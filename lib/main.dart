@@ -6,7 +6,7 @@ void main() {
   runAppScaled(
     const MainApp(),
     scaleFactor: (size) {
-      const double scale = 500;
+      const double scale = 700;
       return size.width / scale;
     },
   );

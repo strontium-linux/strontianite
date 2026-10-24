@@ -9,7 +9,6 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  flutter_swipe_detector: ^2.0.0
   intl: ^0.20.3
   just_tooltip: ^0.4.4
   scaled_app: ^2.3.2

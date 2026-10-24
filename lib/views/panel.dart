@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:turtlinux_shell/views/app_icon.dart';
 
 class Panel extends StatelessWidget {
-  const Panel({super.key});
+  const Panel({super.key, required this.switchPane});
+
+  final Function(int) switchPane;
 
   @override
   Widget build(BuildContext context) {
@@ -19,16 +21,26 @@ class Panel extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            AppIcon(name: 'Alarms', icon: Icons.alarm, exec: 'alarms'),
             AppIcon(
-              name: 'Music',
-              icon: Icons.music_note_outlined,
-              exec: 'music',
+              name: 'Clock',
+              icon: Icons.schedule_outlined,
+              exec: () {
+                switchPane(0);
+              },
             ),
             AppIcon(
-              name: 'Camera',
-              icon: Icons.camera_alt_outlined,
-              exec: 'camera',
+              name: 'Media',
+              icon: Icons.music_note_outlined,
+              exec: () {
+                switchPane(1);
+              },
+            ),
+            AppIcon(
+              name: 'Alarms',
+              icon: Icons.alarm_outlined,
+              exec: () {
+                switchPane(2);
+              },
             ),
           ],
         ),

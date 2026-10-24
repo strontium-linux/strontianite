@@ -11,7 +11,7 @@ class AppIcon extends StatelessWidget {
 
   final String name;
   final IconData icon;
-  final String exec;
+  final Function exec;
 
   @override
   Widget build(BuildContext context) {
@@ -22,7 +22,7 @@ class AppIcon extends StatelessWidget {
         style: IconButton.styleFrom(
           backgroundColor: Theme.of(context).colorScheme.surface,
         ),
-        onPressed: () {},
+        onPressed: () => exec(),
         icon: Icon(icon),
       ),
     );
