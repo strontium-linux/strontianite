@@ -27,7 +27,7 @@ class _AlarmsPaneState extends State<AlarmsPane> {
               (a) => Material(
                 child: Ink(
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primaryContainer,
+                    color: Theme.of(context).colorScheme.surfaceContainer,
                     borderRadius: BorderRadius.circular(16),
                   ),
                   child: InkWell(
@@ -49,9 +49,7 @@ class _AlarmsPaneState extends State<AlarmsPane> {
                           Text(
                             a.format(context),
                             style: TextStyle(
-                              color: Theme.of(
-                                context,
-                              ).colorScheme.onPrimaryContainer,
+                              color: Theme.of(context).colorScheme.onSurface,
                             ),
                           ),
                         ],

@@ -33,6 +33,22 @@ class MediaUtils {
     await _manager.previous();
   }
 
+  static Future<void> seekTo(int pos) async {
+    await _manager.seekTo(pos);
+  }
+
+  static Future<void> shuffle() async {
+    await _manager.toggleShuffle();
+  }
+
+  static int getVolume() {
+    return _manager.volume;
+  }
+
+  static Future<void> setVolume(int volume) async {
+    await _manager.setVolume(volume);
+  }
+
   static Future<void> dispose() async {
     _manager.dispose();
   }

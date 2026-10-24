@@ -11,7 +11,7 @@ class Panel extends StatelessWidget {
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.horizontal(right: Radius.circular(16)),
-        color: Theme.of(context).colorScheme.primaryContainer,
+        color: Theme.of(context).colorScheme.surfaceContainer,
       ),
       padding: EdgeInsets.all(16),
       height: double.infinity,

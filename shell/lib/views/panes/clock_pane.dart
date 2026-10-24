@@ -18,7 +18,7 @@ class _ClockPaneState extends State<ClockPane> {
   void initState() {
     super.initState();
     _updateTime();
-    _timer = Timer.periodic(const Duration(seconds: 1), (Timer timer) {
+    _timer = Timer.periodic(const Duration(seconds: 1), (timer) {
       _updateTime();
     });
   }

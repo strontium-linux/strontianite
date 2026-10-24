@@ -6,7 +6,7 @@ void main() {
   runAppScaled(
     const MainApp(),
     scaleFactor: (size) {
-      const double scale = 700;
+      const double scale = 600;
       return size.width / scale;
     },
   );
@@ -19,7 +19,10 @@ class MainApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'TurtLinux Shell',
-      theme: ThemeData(colorScheme: .fromSeed(seedColor: Color(0xFF00A1BC))),
+      theme: ThemeData(
+        colorScheme: .fromSeed(seedColor: Color(0xFF00A1BC)),
+        fontFamily: 'Google Sans Flex',
+      ),
       home: Scaffold(body: Desktop()),
     );
   }
