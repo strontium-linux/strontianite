@@ -3,14 +3,14 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
-class ClockPanel extends StatefulWidget {
-  const ClockPanel({super.key});
+class ClockPane extends StatefulWidget {
+  const ClockPane({super.key});
 
   @override
-  State<ClockPanel> createState() => _ClockPanelState();
+  State<ClockPane> createState() => _ClockPaneState();
 }
 
-class _ClockPanelState extends State<ClockPanel> {
+class _ClockPaneState extends State<ClockPane> {
   late Timer _timer;
   late String _currentTime;
 

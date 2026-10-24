@@ -22,15 +22,19 @@ class _AlarmEditorState extends State<AlarmEditor> {
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
-          spacing: 16,
+          spacing: 8,
+          mainAxisAlignment: MainAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
+            Text('Time', style: TextStyle(fontWeight: FontWeight.bold)),
             Row(
               spacing: 16,
               children: [
                 Text(_time.format(context)),
                 IconButton(
-                  onPressed: () => _selectTime(context),
+                  onPressed: () => _selectTime(),
                   icon: const Icon(Icons.schedule_outlined),
+                  tooltip: 'Change time',
                 ),
               ],
             ),
@@ -40,7 +44,7 @@ class _AlarmEditorState extends State<AlarmEditor> {
     );
   }
 
-  void _selectTime(BuildContext context) async {
+  void _selectTime() async {
     final timeOfDay = await showTimePicker(
       context: context,
       initialTime: _time,

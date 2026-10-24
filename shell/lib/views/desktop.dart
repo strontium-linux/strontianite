@@ -12,7 +12,7 @@ class Desktop extends StatefulWidget {
 }
 
 class _DesktopState extends State<Desktop> {
-  final List<Widget> _panels = [ClockPanel(), MediaPanel(), AlarmsPanel()];
+  final List<Widget> _panels = [ClockPane(), MediaPane(), AlarmsPane()];
 
   int _panelIndex = 0;
 

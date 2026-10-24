@@ -30,7 +30,7 @@ class Panel extends StatelessWidget {
             ),
             AppIcon(
               name: 'Media',
-              icon: Icons.music_note_outlined,
+              icon: Icons.movie_outlined,
               exec: () {
                 switchPane(1);
               },
