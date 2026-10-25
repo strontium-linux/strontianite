@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:turtlinux_shell/views/app_icon.dart';
 
 class Panel extends StatelessWidget {
@@ -23,21 +24,21 @@ class Panel extends StatelessWidget {
           children: [
             AppIcon(
               name: 'Clock',
-              icon: Icons.schedule_outlined,
+              icon: M3EIcons.schedule_rounded,
               exec: () {
                 switchPane(0);
               },
             ),
             AppIcon(
               name: 'Media',
-              icon: Icons.movie_outlined,
+              icon: M3EIcons.movie_rounded,
               exec: () {
                 switchPane(1);
               },
             ),
             AppIcon(
               name: 'Alarms',
-              icon: Icons.alarm_outlined,
+              icon: M3EIcons.alarm_rounded,
               exec: () {
                 switchPane(2);
               },

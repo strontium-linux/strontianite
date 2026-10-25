@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:turtlinux_shell/views/desktop.dart';
 
@@ -17,12 +18,13 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return MaterialApp(
+    return M3EMaterialApp(
       title: 'TurtLinux Shell',
-      theme: ThemeData(
-        colorScheme: .fromSeed(seedColor: Color(0xFF00A1BC)),
-        fontFamily: 'Google Sans Flex',
-      ),
+      data: M3EThemeData(colorScheme: .fromSeed(Color(0xFF00A1BC))),
+      fontFamily: 'Google Sans Flex',
+      autoTheming: true,
+      dynamicColoring: true,
+      drawUnderSystemBars: true,
       home: Scaffold(body: Desktop()),
     );
   }

@@ -41,6 +41,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.19.1"
+  dynamic_color:
+    dependency: transitive
+    description:
+      name: dynamic_color
+      sha256: "4aeb76de323e8eb660bab5557d826ad7ebbf1434a598f0c6aa8a11a9696a6757"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.9.0"
   equatable:
     dependency: transitive
     description:
@@ -139,6 +147,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.12.19"
+  material_3_expressive:
+    dependency: "direct main"
+    description:
+      name: material_3_expressive
+      sha256: "0b876c669a91f15bf52fb3e9b5c581e3cf5c4e21f3323ca17ef59dcda73a4105"
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.7"
   material_color_utilities:
     dependency: transitive
     description:
@@ -147,6 +163,22 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "0.13.0"
+  material_new_shapes:
+    dependency: transitive
+    description:
+      name: material_new_shapes
+      sha256: e4bc375205e187e8fb232573387112dd8c0dd45b03af8aa2b3c79eb4b9e3e0dc
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.0.0"
+  material_ui:
+    dependency: "direct main"
+    description:
+      name: material_ui
+      sha256: "47b4acbb50683230000996cedd2a5ea511c2106c818db8ee28155ba0f0e26063"
+      url: "https://pub.dev"
+    source: hosted
+    version: "0.0.1"
   meta:
     dependency: transitive
     description:
@@ -155,6 +187,14 @@ packages:
       url: "https://pub.dev"
     source: hosted
     version: "1.18.0"
+  motor:
+    dependency: transitive
+    description:
+      name: motor
+      sha256: cbd49f21b00e568c2b1a55f134ed803614a107782f4fea7769693bca32940c58
+      url: "https://pub.dev"
+    source: hosted
+    version: "1.1.0"
   path:
     dependency: transitive
     description:
@@ -266,4 +306,4 @@ packages:
     version: "15.4.0"
 sdks:
   dart: ">=3.12.2 <4.0.0"
-  flutter: ">=3.22.0"
+  flutter: ">=3.38.0"

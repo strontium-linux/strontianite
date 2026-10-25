@@ -12,6 +12,8 @@ dependencies:
   flutter_m3shapes_extended: ^1.2.1
   intl: ^0.20.3
   just_tooltip: ^0.4.4
+  material_3_expressive: ^1.0.7
+  material_ui: ^0.0.1
   playerctl: ^1.2.1
   scaled_app: ^2.3.2
 dev_dependencies:

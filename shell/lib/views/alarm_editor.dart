@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 
 class AlarmEditor extends StatefulWidget {
   const AlarmEditor({super.key, required this.initialTime});
@@ -31,9 +32,9 @@ class _AlarmEditorState extends State<AlarmEditor> {
               spacing: 16,
               children: [
                 Text(_time.format(context)),
-                IconButton(
+                M3EIconButton(
                   onPressed: () => _selectTime(),
-                  icon: const Icon(Icons.schedule_outlined),
+                  icon: const Icon(M3EIcons.schedule_rounded),
                   tooltip: 'Change time',
                 ),
               ],

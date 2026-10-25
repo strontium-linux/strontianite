@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
 import 'package:turtlinux_shell/views/panel.dart';
 import 'package:turtlinux_shell/views/panes/alarms_pane.dart';
 import 'package:turtlinux_shell/views/panes/clock_pane.dart';

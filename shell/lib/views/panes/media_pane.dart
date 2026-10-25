@@ -2,7 +2,8 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:playerctl/playerctl.dart';
 import 'package:turtlinux_shell/utils/media_utils.dart';
@@ -18,11 +19,9 @@ class _MediaPaneState extends State<MediaPane> {
   MediaInfo? _mediaInfo;
   bool _isPlaying = false;
   late StreamSubscription<PlayerState> _streamSubscription;
-  bool _isChanging = false;
   int _currentPosition = 0;
   late Timer _timer;
   int _volume = 100;
-  bool _isVolChanging = false;
 
   int get _length {
     final l = _mediaInfo?.length ?? 0;
@@ -39,16 +38,16 @@ class _MediaPaneState extends State<MediaPane> {
     MediaUtils.init();
     _mediaInfo = MediaUtils.lastInfo;
     _isPlaying = _mediaInfo?.status.toLowerCase() == 'playing';
-    if (!_isChanging) _currentPosition = _mediaInfo?.position ?? 0;
-    if (!_isVolChanging) _volume = MediaUtils.getVolume();
+    _currentPosition = _mediaInfo?.position ?? 0;
+    _volume = MediaUtils.getVolume();
 
     _streamSubscription = MediaUtils.getStateStream().listen((state) {
       if (mounted) {
         setState(() {
           _mediaInfo = state.currentMedia;
           _isPlaying = _mediaInfo?.status.toLowerCase() == 'playing';
-          if (!_isChanging) _currentPosition = _mediaInfo?.position ?? 0;
-          if (!_isVolChanging) _volume = state.volume;
+          _currentPosition = _mediaInfo?.position ?? 0;
+          _volume = state.volume;
         });
       }
     });
@@ -56,7 +55,7 @@ class _MediaPaneState extends State<MediaPane> {
     _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
       if (_isPlaying) {
         setState(() {
-          if (!_isChanging) _currentPosition = _mediaInfo?.position ?? 0;
+          _currentPosition = _mediaInfo?.position ?? 0;
           _currentPosition = min(_currentPosition + 500000, _length);
         });
       }
@@ -68,38 +67,38 @@ class _MediaPaneState extends State<MediaPane> {
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
-      spacing: 16,
+      spacing: 12,
       children: [
         _buildImage(),
         Text(
-          _mediaInfo?.title ?? 'Unknown Song',
+          _mediaInfo?.title ?? 'Not playing',
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
             fontVariations: [FontVariation.width(125)],
           ),
         ),
-        SliderTheme(
-          data: SliderThemeData(showValueIndicator: ShowValueIndicator.onDrag),
-          child: Slider(
-            value: _sliderValue,
-            label: '${(_currentPosition * 0.000001).round().toString()}s',
-            onChanged: (value) {
-              setState(() {
-                _currentPosition = (value * _length).round();
-              });
-            },
-            onChangeStart: (value) {
-              debugPrint('Change start');
-              _isChanging = true;
-            },
-            onChangeEnd: (value) async {
-              debugPrint('Change end, current position: $_currentPosition');
-              debugPrint('Max position: $_length');
-              // IMPORTANT: playerctl wrapper passes us to playerctl which takes seconds
-              await MediaUtils.seekTo(_currentPosition ~/ 1000000);
-              _isChanging = false;
-            },
+        Padding(
+          padding: EdgeInsets.only(left: 16, right: 16),
+          child: SliderTheme(
+            data: SliderThemeData(
+              showValueIndicator: ShowValueIndicator.onDrag,
+            ),
+            child: M3ESlider(
+              value: _sliderValue,
+              label: '${(_currentPosition * 0.000001).round().toString()}s',
+              onChanged: (value) {
+                setState(() {
+                  _currentPosition = (value * _length).round();
+                });
+              },
+              onChangeEnd: (value) async {
+                debugPrint('Change end, current position: $_currentPosition');
+                debugPrint('Max position: $_length');
+                // IMPORTANT: playerctl wrapper passes us to playerctl which takes seconds
+                await MediaUtils.seekTo(_currentPosition ~/ 1000000);
+              },
+            ),
           ),
         ),
         Text(_elapsed),
@@ -122,19 +121,21 @@ class _MediaPaneState extends State<MediaPane> {
 
   List<Widget> _buildControlButtons() {
     return [
-      IconButton(
+      M3EIconButton(
         onPressed: () async {
           await MediaUtils.shuffle();
         },
-        icon: const Icon(Icons.shuffle),
+        icon: const Icon(M3EIcons.shuffle),
       ),
-      IconButton.filledTonal(
+      M3EIconButton(
+        variant: M3EIconButtonVariant.tonal,
         onPressed: () async {
           await MediaUtils.previous();
         },
-        icon: const Icon(Icons.skip_previous_outlined),
+        icon: const Icon(M3EIcons.skip_previous_rounded),
       ),
-      IconButton.filled(
+      M3EIconButton(
+        variant: M3EIconButtonVariant.filled,
         onPressed: () async {
           if (_isPlaying) {
             if (mounted) {
@@ -153,26 +154,27 @@ class _MediaPaneState extends State<MediaPane> {
           }
         },
         icon: _isPlaying
-            ? const Icon(Icons.pause_outlined)
-            : const Icon(Icons.play_arrow_outlined),
+            ? const Icon(M3EIcons.pause_rounded)
+            : const Icon(M3EIcons.play_arrow_rounded),
       ),
-      IconButton.filledTonal(
+      M3EIconButton(
+        variant: M3EIconButtonVariant.tonal,
         onPressed: () async {
           await MediaUtils.next();
         },
-        icon: const Icon(Icons.skip_next_outlined),
+        icon: const Icon(M3EIcons.skip_next_rounded),
       ),
-      IconButton(
+      M3EIconButton(
         onPressed: () async {
           _showVolumeDialog();
         },
-        icon: const Icon(Icons.volume_up_outlined),
+        icon: const Icon(M3EIcons.volume_up_rounded),
       ),
     ];
   }
 
   Widget _buildImage() {
-    return M3EContainer.pill(child: _buildImageCore());
+    return M3EContainer.pill(width: 100, height: 100, child: _buildImageCore());
   }
 
   Widget _buildImageCore() {
@@ -201,15 +203,11 @@ class _MediaPaneState extends State<MediaPane> {
   }
 
   Widget _buildDefaultImage() {
-    return SizedBox(
-      width: 100,
-      height: 100,
-      child: Container(
-        color: Theme.of(context).colorScheme.primaryContainer,
-        child: Icon(
-          Icons.music_note_outlined,
-          color: Theme.of(context).colorScheme.onPrimaryContainer,
-        ),
+    return Container(
+      color: Theme.of(context).colorScheme.primaryContainer,
+      child: Icon(
+        M3EIcons.music_note_rounded,
+        color: Theme.of(context).colorScheme.onPrimaryContainer,
       ),
     );
   }
@@ -221,16 +219,17 @@ class _MediaPaneState extends State<MediaPane> {
   }
 
   void _showVolumeDialog() {
+    debugPrint('Volume: $_volume');
     showDialog(
       context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Adjust volume'),
+      builder: (context) => M3EDialog(
+        title: 'Adjust volume',
         content: StatefulBuilder(
           builder: (context, setState) => SliderTheme(
             data: SliderThemeData(
               showValueIndicator: ShowValueIndicator.onDrag,
             ),
-            child: Slider(
+            child: M3ESlider(
               value: _volume / 100,
               label: _volume.toString(),
               onChanged: (vol) async {
@@ -238,12 +237,8 @@ class _MediaPaneState extends State<MediaPane> {
                   _volume = (vol * 100).round();
                 });
               },
-              onChangeStart: (vol) {
-                _isVolChanging = true;
-              },
               onChangeEnd: (vol) async {
                 await MediaUtils.setVolume(_volume);
-                _isVolChanging = false;
               },
             ),
           ),

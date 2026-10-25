@@ -1,4 +1,5 @@
-import 'package:flutter/material.dart';
+import 'package:material_ui/material_ui.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:turtlinux_shell/views/alarm_editor.dart';
 
 class AlarmsPane extends StatefulWidget {
@@ -45,7 +46,7 @@ class _AlarmsPaneState extends State<AlarmsPane> {
                       child: Row(
                         spacing: 8,
                         children: [
-                          const Icon(Icons.alarm_outlined),
+                          const Icon(M3EIcons.alarm_rounded),
                           Text(
                             a.format(context),
                             style: TextStyle(
