@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:battery_plus/battery_plus.dart';
+import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:turtlinux_shell/utils/battery_utils.dart';
 
@@ -23,6 +24,8 @@ class _BatteryIndicatorState extends State<BatteryIndicator> {
   @override
   void initState() {
     super.initState();
+    _batteryLevel = BatteryUtils.lastLevel;
+    _batteryState = BatteryUtils.lastState;
     _initBattery();
   }
 
@@ -61,7 +64,7 @@ class _BatteryIndicatorState extends State<BatteryIndicator> {
                   ),
                 ],
               ),
-              Text(_batteryLevel.toString(), style: TextStyle(fontSize: 10)),
+              _buildBatteryIndicator(_batteryState),
             ],
           ),
         ),
@@ -88,11 +91,12 @@ class _BatteryIndicatorState extends State<BatteryIndicator> {
 
   Future<void> _initBattery() async {
     final level = await BatteryUtils.getBatteryLevel();
+    BatteryUtils.cacheBatteryLevel(level);
     setState(() {
       _batteryLevel = level;
     });
 
-    _batteryTimer = Timer(const Duration(minutes: 5), () async {
+    _batteryTimer = Timer.periodic(const Duration(minutes: 5), (timer) async {
       final level = await BatteryUtils.getBatteryLevel();
       BatteryUtils.cacheBatteryLevel(level);
       setState(() {
@@ -101,7 +105,10 @@ class _BatteryIndicatorState extends State<BatteryIndicator> {
     });
 
     final state = await BatteryUtils.getBatteryState();
-    _batteryState = state;
+    BatteryUtils.cacheBatteryState(state);
+    setState(() {
+      _batteryState = state;
+    });
 
     _subscription = BatteryUtils.getStateStream().listen((state) {
       BatteryUtils.cacheBatteryState(state);
@@ -114,10 +121,21 @@ class _BatteryIndicatorState extends State<BatteryIndicator> {
   Color _getIndicatorColor(BatteryState state) {
     switch (state) {
       case BatteryState.charging:
-      case BatteryState.full:
-        return Color(0x0058ba1a);
+        return Color(0xFF58ba1a);
       default:
         return Theme.of(context).colorScheme.surface;
+    }
+  }
+
+  Widget _buildBatteryIndicator(BatteryState state) {
+    if (state == BatteryState.charging) {
+      return Icon(
+        M3EIcons.electric_bolt_rounded,
+        color: Theme.of(context).colorScheme.surface,
+        size: 12,
+      );
+    } else {
+      return Text(_batteryLevel.toString(), style: TextStyle(fontSize: 10));
     }
   }
 }

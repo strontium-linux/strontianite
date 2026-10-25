@@ -113,7 +113,7 @@ class _MediaPaneState extends State<MediaPane> {
             style: TextStyle(
               fontWeight: FontWeight.bold,
               color: Theme.of(context).colorScheme.primary,
-              fontVariations: [FontVariation.width(125)],
+              fontVariations: [FontVariation('ROND', 100)],
             ),
             textAlign: TextAlign.center,
           ),
