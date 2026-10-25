@@ -13,22 +13,25 @@ class ClockEditor extends StatelessWidget {
       ),
       body: Padding(
         padding: const EdgeInsets.all(16),
-        child: Column(
-          spacing: 8,
-          mainAxisAlignment: MainAxisAlignment.start,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              padding: EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceContainer,
-                borderRadius: BorderRadius.circular(16),
+        child: Center(
+          child: Column(
+            spacing: 8,
+            mainAxisAlignment: MainAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 100,
+                height: 100,
+                padding: EdgeInsets.all(16),
+                alignment: AlignmentGeometry.center,
+                decoration: BoxDecoration(
+                  color: Theme.of(context).colorScheme.surfaceContainer,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: FittedBox(fit: BoxFit.contain, child: const Clock()),
               ),
-              child: FittedBox(fit: BoxFit.contain, child: const Clock()),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );
