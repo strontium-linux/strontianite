@@ -19,6 +19,7 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return M3EMaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'TurtLinux Shell',
       data: M3EThemeData(colorScheme: .fromSeed(Color(0xFF00A1BC))),
       fontFamily: 'Google Sans Flex',

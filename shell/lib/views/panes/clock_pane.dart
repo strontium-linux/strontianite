@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:material_ui/material_ui.dart';
 import 'package:intl/intl.dart';
+import 'package:turtlinux_shell/views/battery_indicator.dart';
 
 class ClockPane extends StatefulWidget {
   const ClockPane({super.key});
@@ -12,7 +13,7 @@ class ClockPane extends StatefulWidget {
 
 class _ClockPaneState extends State<ClockPane> {
   late Timer _timer;
-  late String _currentTime;
+  late DateTime _currentTime;
 
   @override
   void initState() {
@@ -31,14 +32,67 @@ class _ClockPaneState extends State<ClockPane> {
       },
       child: Container(
         color: Theme.of(context).colorScheme.surface,
-        child: Center(
-          child: Text(
-            _currentTime,
-            style: TextStyle(
-              fontSize: 32,
-              color: Theme.of(context).colorScheme.primary,
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(16),
+              child: Align(
+                alignment: AlignmentGeometry.centerRight,
+                child: SizedBox(
+                  width: 32,
+                  height: 16,
+                  child: Stack(
+                    alignment: AlignmentGeometry.center,
+                    children: [const BatteryIndicator()],
+                  ),
+                ),
+              ),
             ),
-          ),
+            Expanded(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Text(
+                    DateFormat('HH').format(_currentTime),
+                    style: TextStyle(
+                      fontSize: 80,
+                      height: 0.9,
+                      color: Theme.of(context).colorScheme.primary,
+                      fontVariations: [FontVariation('ROND', 100)],
+                    ),
+                  ),
+                  Text(
+                    DateFormat('mm').format(_currentTime),
+                    style: TextStyle(
+                      fontSize: 80,
+                      height: 0.9,
+                      color: Theme.of(context).colorScheme.primary,
+                      fontVariations: [FontVariation('ROND', 100)],
+                    ),
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.only(top: 16),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Text(
+                          DateFormat('EEEE, MMMM d').format(_currentTime),
+                          style: TextStyle(
+                            color: Theme.of(context).colorScheme.onSurface,
+                            fontVariations: [FontVariation('ROND', 100)],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );
@@ -52,9 +106,8 @@ class _ClockPaneState extends State<ClockPane> {
 
   void _updateTime() {
     final DateTime now = DateTime.now();
-    final String time = DateFormat('hh:mm:ss a').format(now);
     setState(() {
-      _currentTime = time;
+      _currentTime = now;
     });
   }
 }
