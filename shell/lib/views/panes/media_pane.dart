@@ -19,18 +19,30 @@ class _MediaPaneState extends State<MediaPane> {
   MediaInfo? _mediaInfo;
   bool _isPlaying = false;
   late StreamSubscription<PlayerState> _streamSubscription;
-  int _currentPosition = 0;
-  late Timer _timer;
+  int _anchorPosition = 0;
   int _volume = 100;
+  final Stopwatch _posStopwatch = Stopwatch();
+  late Timer _timer;
+  int? _seekPosition;
+  DateTime _ignorePositionUntil = DateTime.fromMillisecondsSinceEpoch(0);
+  DateTime _ignorePlayStateUntil = DateTime.fromMillisecondsSinceEpoch(0);
 
   int get _length {
     final l = _mediaInfo?.length ?? 0;
     return l <= 0 ? 1 : l;
   }
 
-  double get _sliderValue => (_currentPosition / _length).clamp(0.0, 1.0);
+  int get _livePosition {
+    if (!_isPlaying) return _anchorPosition;
+    return min(_anchorPosition + _posStopwatch.elapsedMicroseconds, _length);
+  }
+
+  int get _displayPosition => _seekPosition ?? _livePosition;
+  double get _sliderValue => (_displayPosition / _length).clamp(0.0, 1.0);
   String get _elapsed =>
-      '${_microsecondsToTimestamp(_currentPosition)} / ${_microsecondsToTimestamp(_length)}';
+      '${_microsecondsToTimestamp(_displayPosition)} / ${_microsecondsToTimestamp(_length)}';
+
+  bool get _noMedia => _mediaInfo == null || _mediaInfo?.length == null;
 
   @override
   void initState() {
@@ -38,26 +50,45 @@ class _MediaPaneState extends State<MediaPane> {
     MediaUtils.init();
     _mediaInfo = MediaUtils.lastInfo;
     _isPlaying = _mediaInfo?.status.toLowerCase() == 'playing';
-    _currentPosition = _mediaInfo?.position ?? 0;
+    _reanchor(_mediaInfo?.position ?? 0);
     _volume = MediaUtils.getVolume();
 
     _streamSubscription = MediaUtils.getStateStream().listen((state) {
       if (mounted) {
         setState(() {
+          final newPos = state.currentMedia.position ?? 0;
+          final trackChanged = state.currentMedia.title != _mediaInfo?.title;
+          final offset = (newPos - _livePosition).abs();
+
           _mediaInfo = state.currentMedia;
-          _isPlaying = _mediaInfo?.status.toLowerCase() == 'playing';
-          _currentPosition = _mediaInfo?.position ?? 0;
+          debugPrint('Media info: $_mediaInfo');
+          if (_canUpdatePlayState()) {
+            final nowPlaying =
+                (_mediaInfo?.status.toLowerCase() == 'playing') ||
+                _mediaInfo == null;
+            debugPrint('Now playing: $nowPlaying');
+            if (nowPlaying != _isPlaying) _reanchor(_livePosition);
+            _isPlaying = nowPlaying;
+          }
           _volume = state.volume;
+
+          final ignorePos =
+              _seekPosition != null ||
+              DateTime.now().isBefore(_ignorePositionUntil);
+
+          if (trackChanged) {
+            _seekPosition = null;
+            _reanchor(newPos);
+          } else if (!ignorePos && (offset > 3000000 || !_isPlaying)) {
+            _reanchor(newPos);
+          }
         });
       }
     });
 
-    _timer = Timer.periodic(const Duration(milliseconds: 500), (timer) {
-      if (_isPlaying) {
-        setState(() {
-          _currentPosition = _mediaInfo?.position ?? 0;
-          _currentPosition = min(_currentPosition + 500000, _length);
-        });
+    _timer = Timer.periodic(const Duration(milliseconds: 200), (_) {
+      if (_isPlaying && mounted) {
+        setState(() {});
       }
     });
   }
@@ -71,7 +102,9 @@ class _MediaPaneState extends State<MediaPane> {
       children: [
         _buildImage(),
         Text(
-          _mediaInfo?.title ?? 'Not playing',
+          (_noMedia || _mediaInfo?.title == null)
+              ? 'No media'
+              : _mediaInfo!.title,
           style: TextStyle(
             fontWeight: FontWeight.bold,
             color: Theme.of(context).colorScheme.primary,
@@ -86,17 +119,26 @@ class _MediaPaneState extends State<MediaPane> {
             ),
             child: M3ESlider(
               value: _sliderValue,
-              label: '${(_currentPosition * 0.000001).round().toString()}s',
+              label: '${(_displayPosition * 0.000001).round().toString()}s',
+              enabled: !_noMedia,
               onChanged: (value) {
                 setState(() {
-                  _currentPosition = (value * _length).round();
+                  _seekPosition = (value * _length).round();
                 });
               },
               onChangeEnd: (value) async {
-                debugPrint('Change end, current position: $_currentPosition');
+                debugPrint('Change end, current position: $_anchorPosition');
                 debugPrint('Max position: $_length');
+                final target = (value * _length).round();
+                setState(() {
+                  _reanchor(target);
+                  _seekPosition = null;
+                  _ignorePositionUntil = DateTime.now().add(
+                    const Duration(seconds: 3),
+                  );
+                });
                 // IMPORTANT: playerctl wrapper passes us to playerctl which takes seconds
-                await MediaUtils.seekTo(_currentPosition ~/ 1000000);
+                await MediaUtils.seekTo(target ~/ 1000000);
               },
             ),
           ),
@@ -113,7 +155,7 @@ class _MediaPaneState extends State<MediaPane> {
   }
 
   @override
-  void dispose() async {
+  void dispose() {
     _streamSubscription.cancel();
     _timer.cancel();
     super.dispose();
@@ -140,14 +182,14 @@ class _MediaPaneState extends State<MediaPane> {
           if (_isPlaying) {
             if (mounted) {
               setState(() {
-                _isPlaying = false;
+                _optimisticPlayToggle(false);
               });
             }
             await MediaUtils.pause();
           } else {
             if (mounted) {
               setState(() {
-                _isPlaying = true;
+                _optimisticPlayToggle(true);
               });
             }
             await MediaUtils.play();
@@ -203,11 +245,15 @@ class _MediaPaneState extends State<MediaPane> {
   }
 
   Widget _buildDefaultImage() {
-    return Container(
-      color: Theme.of(context).colorScheme.primaryContainer,
-      child: Icon(
-        M3EIcons.music_note_rounded,
-        color: Theme.of(context).colorScheme.onPrimaryContainer,
+    return SizedBox(
+      width: 100,
+      height: 100,
+      child: Container(
+        color: Theme.of(context).colorScheme.primaryContainer,
+        child: Icon(
+          M3EIcons.music_note_rounded,
+          color: Theme.of(context).colorScheme.onPrimaryContainer,
+        ),
       ),
     );
   }
@@ -243,7 +289,37 @@ class _MediaPaneState extends State<MediaPane> {
             ),
           ),
         ),
+        actions: [
+          M3EButton.filled(
+            onPressed: () {
+              Navigator.pop(context);
+            },
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 8,
+              children: [Icon(M3EIcons.check_rounded), Text('OK')],
+            ),
+          ),
+        ],
       ),
     );
+  }
+
+  void _optimisticPlayToggle(bool playing) {
+    _reanchor(_livePosition);
+    _isPlaying = playing;
+    _ignorePlayStateUntil = DateTime.now().add(const Duration(seconds: 3));
+  }
+
+  bool _canUpdatePlayState() {
+    return DateTime.now().isAfter(_ignorePlayStateUntil);
+  }
+
+  void _reanchor(int pos) {
+    _anchorPosition = pos;
+    _posStopwatch
+      ..reset()
+      ..start();
   }
 }
