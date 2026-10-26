@@ -1,4 +1,4 @@
-package com.example.turtlinux_shell
+package dev.ingstudios.strontianite
 
 import io.flutter.embedding.android.FlutterActivity
 

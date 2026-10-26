@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:turtlinux_shell/views/battery_indicator.dart';
-import 'package:turtlinux_shell/views/clock.dart';
-import 'package:turtlinux_shell/views/clock_editor.dart';
+import 'package:strontianite/views/battery_indicator.dart';
+import 'package:strontianite/views/clock.dart';
+import 'package:strontianite/views/clock_editor.dart';
 
 class ClockPane extends StatelessWidget {
   const ClockPane({super.key});

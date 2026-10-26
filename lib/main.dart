@@ -1,7 +1,7 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:scaled_app/scaled_app.dart';
-import 'package:turtlinux_shell/views/desktop.dart';
+import 'package:strontianite/views/desktop.dart';
 
 void main() {
   runAppScaled(

@@ -1,3 +1,3 @@
-# turtlinux_shell
+# strontianite
 
 A new Flutter project.

@@ -1,5 +1,5 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:turtlinux_shell/views/clock.dart';
+import 'package:strontianite/views/clock.dart';
 
 class ClockEditor extends StatelessWidget {
   const ClockEditor({super.key});

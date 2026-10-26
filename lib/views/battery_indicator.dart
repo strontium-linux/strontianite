@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:battery_plus/battery_plus.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:turtlinux_shell/utils/battery_utils.dart';
+import 'package:strontianite/utils/battery_utils.dart';
 
 class BatteryIndicator extends StatefulWidget {
   const BatteryIndicator({super.key});

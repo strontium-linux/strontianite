@@ -1,6 +1,6 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import 'package:turtlinux_shell/views/app_icon.dart';
+import 'package:strontianite/views/app_icon.dart';
 
 class Panel extends StatelessWidget {
   const Panel({super.key, required this.switchPane});

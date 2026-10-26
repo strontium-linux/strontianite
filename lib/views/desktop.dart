@@ -1,8 +1,8 @@
 import 'package:material_ui/material_ui.dart';
-import 'package:turtlinux_shell/views/panel.dart';
-import 'package:turtlinux_shell/views/panes/alarms_pane.dart';
-import 'package:turtlinux_shell/views/panes/clock_pane.dart';
-import 'package:turtlinux_shell/views/panes/media_pane.dart';
+import 'package:strontianite/views/panel.dart';
+import 'package:strontianite/views/panes/alarms_pane.dart';
+import 'package:strontianite/views/panes/clock_pane.dart';
+import 'package:strontianite/views/panes/media_pane.dart';
 
 class Desktop extends StatefulWidget {
   const Desktop({super.key});

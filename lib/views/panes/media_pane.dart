@@ -6,7 +6,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:playerctl/playerctl.dart';
-import 'package:turtlinux_shell/utils/media_utils.dart';
+import 'package:strontianite/utils/media_utils.dart';
 
 class MediaPane extends StatefulWidget {
   const MediaPane({super.key});
