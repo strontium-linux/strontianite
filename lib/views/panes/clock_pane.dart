@@ -1,4 +1,5 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:strontianite/enums/clock_type.dart';
 import 'package:strontianite/views/battery_indicator.dart';
 import 'package:strontianite/views/clock.dart';
 import 'package:strontianite/views/clock_editor.dart';
@@ -36,7 +37,7 @@ class ClockPane extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(child: const Clock()),
+            Expanded(child: const Clock(clockType: ClockType.flex)),
           ],
         ),
       ),

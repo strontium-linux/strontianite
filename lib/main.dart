@@ -26,7 +26,7 @@ class MainApp extends StatelessWidget {
       autoTheming: true,
       dynamicColoring: true,
       drawUnderSystemBars: true,
-      home: Scaffold(body: Desktop()),
+      home: SafeArea(child: Scaffold(body: Desktop())),
     );
   }
 }

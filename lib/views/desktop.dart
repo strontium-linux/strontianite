@@ -13,8 +13,13 @@ class Desktop extends StatefulWidget {
 
 class _DesktopState extends State<Desktop> {
   final List<Widget> _panels = [ClockPane(), MediaPane(), AlarmsPane()];
+  late PageController _pageController;
 
-  int _panelIndex = 0;
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,34 +28,20 @@ class _DesktopState extends State<Desktop> {
         Panel(
           switchPane: (i) {
             setState(() {
-              _panelIndex = i;
+              _pageController.jumpToPage(i);
             });
           },
         ),
         Expanded(
-          child: Align(
-            alignment: AlignmentGeometry.topCenter,
-            child: GestureDetector(
-              onHorizontalDragEnd: (details) {
-                if (details.primaryVelocity != null) {
-                  if (details.primaryVelocity! > 50) {
-                    debugPrint('swipe right $_panelIndex');
-                    setState(() {
-                      if (_panelIndex > 0) _panelIndex -= 1;
-                    });
-                  } else if (details.primaryVelocity! < 50) {
-                    debugPrint('swipe left $_panelIndex');
-                    setState(() {
-                      if (_panelIndex < _panels.length - 1) _panelIndex += 1;
-                    });
-                  }
-                }
-              },
-              child: _panels[_panelIndex],
-            ),
-          ),
+          child: PageView(controller: _pageController, children: _panels),
         ),
       ],
     );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }

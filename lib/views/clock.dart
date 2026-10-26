@@ -2,9 +2,12 @@ import 'dart:async';
 
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:strontianite/enums/clock_type.dart';
 
 class Clock extends StatefulWidget {
-  const Clock({super.key});
+  const Clock({super.key, required this.clockType});
+
+  final ClockType clockType;
 
   @override
   State<Clock> createState() => _ClockState();

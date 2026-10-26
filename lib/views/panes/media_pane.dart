@@ -7,6 +7,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:playerctl/playerctl.dart';
 import 'package:strontianite/utils/media_utils.dart';
+import 'package:flutter_media_controller/flutter_media_controller.dart' as fmc;
 
 class MediaPane extends StatefulWidget {
   const MediaPane({super.key});
@@ -18,7 +19,8 @@ class MediaPane extends StatefulWidget {
 class _MediaPaneState extends State<MediaPane> {
   MediaInfo? _mediaInfo;
   bool _isPlaying = false;
-  late StreamSubscription<PlayerState> _streamSubscription;
+  late StreamSubscription<PlayerState> _linuxStreamSubscription;
+  late StreamSubscription<fmc.MediaInfo> _androidStreamSubscription;
   int _anchorPosition = 0;
   int _volume = 100;
   final Stopwatch _posStopwatch = Stopwatch();
@@ -43,7 +45,8 @@ class _MediaPaneState extends State<MediaPane> {
   String get _elapsed =>
       '${_microsecondsToTimestamp(_displayPosition)} / ${_microsecondsToTimestamp(_length)}';
 
-  bool get _noMedia => _mediaInfo == null || _mediaInfo?.length == null;
+  bool get _noMedia =>
+      _mediaInfo == null || _mediaInfo?.status.toLowerCase() == 'stopped';
 
   @override
   void initState() {
@@ -54,7 +57,7 @@ class _MediaPaneState extends State<MediaPane> {
     _reanchor(_mediaInfo?.position ?? 0);
     _volume = MediaUtils.getVolume();
 
-    _streamSubscription = MediaUtils.getStateStream().listen((state) {
+    _linuxStreamSubscription = MediaUtils.getStateStream().listen((state) {
       if (mounted) {
         setState(() {
           final newPos = state.currentMedia.position ?? 0;
@@ -87,6 +90,31 @@ class _MediaPaneState extends State<MediaPane> {
       }
     });
 
+    _androidStreamSubscription = MediaUtils.getMediaInfoAndroidStream().listen((
+      info,
+    ) {
+      if (mounted) {
+        setState(() {
+          _mediaInfo = MediaInfo(
+            title: info.track,
+            artist: info.artist,
+            status: info.isPlaying ? 'Playing' : 'Paused',
+            artUrl: info.thumbnailUrl,
+          );
+          debugPrint('Media info: $_mediaInfo');
+          if (_canUpdatePlayState()) {
+            final nowPlaying =
+                (_mediaInfo?.status.toLowerCase() == 'playing') ||
+                _mediaInfo == null;
+            debugPrint('Now playing: $nowPlaying');
+            if (nowPlaying != _isPlaying) _reanchor(_livePosition);
+            _isPlaying = nowPlaying;
+          }
+          _volume = 100;
+        });
+      }
+    });
+
     _timer = Timer.periodic(const Duration(milliseconds: 200), (_) {
       if (_isPlaying && mounted) {
         setState(() {});
@@ -98,72 +126,76 @@ class _MediaPaneState extends State<MediaPane> {
 
   @override
   Widget build(BuildContext context) {
-    return Column(
-      mainAxisAlignment: MainAxisAlignment.center,
-      crossAxisAlignment: CrossAxisAlignment.center,
-      spacing: 12,
-      children: [
-        _buildImage(),
-        Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16),
-          child: Text(
-            (_noMedia || _mediaInfo?.title == null)
-                ? 'No media'
-                : _mediaInfo!.title,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Theme.of(context).colorScheme.primary,
-              fontVariations: [FontVariation('ROND', 100)],
-            ),
-            textAlign: TextAlign.center,
-          ),
-        ),
-        Padding(
-          padding: const EdgeInsets.only(left: 16, right: 16),
-          child: SliderTheme(
-            data: SliderThemeData(
-              showValueIndicator: ShowValueIndicator.onDrag,
-            ),
-            child: M3ESlider(
-              value: _sliderValue,
-              label: '${(_displayPosition * 0.000001).round().toString()}s',
-              enabled: !_noMedia,
-              onChanged: (value) {
-                setState(() {
-                  _seekPosition = (value * _length).round();
-                });
-              },
-              onChangeEnd: (value) async {
-                debugPrint('Change end, current position: $_anchorPosition');
-                debugPrint('Max position: $_length');
-                final target = (value * _length).round();
-                setState(() {
-                  _reanchor(target);
-                  _seekPosition = null;
-                  _ignorePositionUntil = DateTime.now().add(
-                    const Duration(seconds: 3),
-                  );
-                });
-                // IMPORTANT: playerctl wrapper passes us to playerctl which takes seconds
-                await MediaUtils.seekTo(target ~/ 1000000);
-              },
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        spacing: 12,
+        children: [
+          _buildImage(),
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            child: Text(
+              (_noMedia || _mediaInfo?.title == null)
+                  ? 'No media'
+                  : _mediaInfo!.title,
+              style: TextStyle(
+                fontWeight: FontWeight.bold,
+                color: Theme.of(context).colorScheme.primary,
+                fontVariations: [FontVariation('ROND', 100)],
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
-        ),
-        Text(_elapsed),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          spacing: 16,
-          children: _buildControlButtons(),
-        ),
-      ],
+          Padding(
+            padding: const EdgeInsets.only(left: 16, right: 16),
+            child: SliderTheme(
+              data: SliderThemeData(
+                showValueIndicator: ShowValueIndicator.onDrag,
+              ),
+              child: M3ESlider(
+                value: _sliderValue,
+                label: '${(_displayPosition * 0.000001).round().toString()}s',
+                enabled: !_noMedia && Platform.isLinux,
+                onChanged: (value) {
+                  setState(() {
+                    _seekPosition = (value * _length).round();
+                  });
+                },
+                onChangeEnd: (value) async {
+                  debugPrint('Change end, current position: $_anchorPosition');
+                  debugPrint('Max position: $_length');
+                  final target = (value * _length).round();
+                  setState(() {
+                    _reanchor(target);
+                    _seekPosition = null;
+                    _ignorePositionUntil = DateTime.now().add(
+                      const Duration(seconds: 3),
+                    );
+                  });
+                  // IMPORTANT: playerctl wrapper passes us to playerctl which takes seconds
+                  await MediaUtils.seekTo(target ~/ 1000000);
+                },
+              ),
+            ),
+          ),
+          Text(_elapsed),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 16,
+            children: _buildControlButtons(),
+          ),
+        ],
+      ),
     );
   }
 
   @override
   void dispose() {
-    _streamSubscription.cancel();
+    _linuxStreamSubscription.cancel();
+    _androidStreamSubscription.cancel();
     _timer.cancel();
     super.dispose();
   }
@@ -240,12 +272,14 @@ class _MediaPaneState extends State<MediaPane> {
       return _buildDefaultImage();
     }
 
+    Widget fallback(c, e, s) => _buildDefaultImage();
+
     final uri = Uri.tryParse(_mediaInfo!.artUrl!);
     if (uri == null) {
       return _buildDefaultImage();
     }
 
-    Widget fallback(c, e, s) => _buildDefaultImage();
+    debugPrint('Uri scheme: ${uri.scheme}');
 
     switch (uri.scheme) {
       case 'file':
@@ -294,6 +328,7 @@ class _MediaPaneState extends State<MediaPane> {
             child: M3ESlider(
               value: _volume / 100,
               label: _volume.toString(),
+              enabled: Platform.isLinux,
               onChanged: (vol) async {
                 setState(() {
                   _volume = (vol * 100).round();

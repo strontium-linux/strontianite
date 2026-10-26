@@ -6,7 +6,8 @@ class BatteryUtils {
   static BatteryState lastState = BatteryState.unknown;
 
   static Future<int> getBatteryLevel() async {
-    return await battery.batteryLevel;
+    final level = await battery.batteryLevel;
+    return level <= 100 && level >= 0 ? level : 100;
   }
 
   static Future<BatteryState> getBatteryState() async {
