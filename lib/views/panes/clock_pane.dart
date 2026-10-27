@@ -1,14 +1,17 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:strontianite/enums/clock_type.dart';
+import 'package:strontianite/providers/clock_provider.dart';
 import 'package:strontianite/views/battery_indicator.dart';
 import 'package:strontianite/views/clock.dart';
 import 'package:strontianite/views/clock_editor.dart';
 
-class ClockPane extends StatelessWidget {
+class ClockPane extends ConsumerWidget {
   const ClockPane({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final clockType = ref.watch(clockProvider);
+
     return GestureDetector(
       onLongPress: () {
         debugPrint('long press detected');
@@ -37,7 +40,7 @@ class ClockPane extends StatelessWidget {
                 ),
               ),
             ),
-            Expanded(child: const Clock(clockType: ClockType.flex)),
+            Expanded(child: Clock(clockType: clockType)),
           ],
         ),
       ),

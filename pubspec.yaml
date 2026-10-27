@@ -12,12 +12,14 @@ dependencies:
     sdk: flutter
   flutter_m3shapes_extended: ^1.2.1
   flutter_media_controller: ^1.0.3
+  flutter_riverpod: ^3.4.3
   intl: ^0.20.3
   just_tooltip: ^0.4.4
   material_3_expressive: ^1.0.7
   material_ui: ^0.0.1
   playerctl: ^1.2.1
   scaled_app: ^2.3.2
+  shared_preferences: ^2.5.6
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -29,3 +31,18 @@ flutter:
     - family: Google Sans Flex
       fonts:
         - asset: fonts/google-sans-flex.ttf
+    - family: Frame WeatherVF
+      fonts:
+        - asset: fonts/frame-weathervf.ttf
+    - family: Growth
+      fonts:
+        - asset: fonts/growth.ttf
+    - family: InflateVF
+      fonts:
+        - asset: fonts/inflatevf.ttf
+    - family: RotationGX
+      fonts:
+        - asset: fonts/rotationgx.ttf
+    - family: Ruby Regular
+      fonts:
+        - asset: fonts/ruby-regular.otf

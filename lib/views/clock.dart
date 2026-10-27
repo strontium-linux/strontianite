@@ -36,6 +36,7 @@ class _ClockState extends State<Clock> {
         Text(
           DateFormat('HH').format(_currentTime),
           style: TextStyle(
+            fontFamily: _getFont(widget.clockType),
             fontSize: 80,
             height: 0.9,
             color: Theme.of(context).colorScheme.primary,
@@ -46,6 +47,7 @@ class _ClockState extends State<Clock> {
         Text(
           DateFormat('mm').format(_currentTime),
           style: TextStyle(
+            fontFamily: _getFont(widget.clockType),
             fontSize: 80,
             height: 0.9,
             color: Theme.of(context).colorScheme.primary,
@@ -84,5 +86,22 @@ class _ClockState extends State<Clock> {
     setState(() {
       _currentTime = now;
     });
+  }
+
+  String _getFont(ClockType clockType) {
+    switch (clockType) {
+      case ClockType.flex:
+        return 'Google Sans Flex';
+      case ClockType.frameWeathervf:
+        return 'Frame WeatherVF';
+      case ClockType.growth:
+        return 'Growth';
+      case ClockType.inflatevf:
+        return 'InflateVF';
+      case ClockType.rotationgx:
+        return 'RotationGX';
+      case ClockType.rubyRegular:
+        return 'Ruby Regu;ar';
+    }
   }
 }

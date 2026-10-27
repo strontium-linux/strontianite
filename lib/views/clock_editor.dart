@@ -1,15 +1,17 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:strontianite/enums/clock_type.dart';
+import 'package:strontianite/providers/clock_provider.dart';
 import 'package:strontianite/views/clock.dart';
 
-class ClockEditor extends StatefulWidget {
+class ClockEditor extends ConsumerStatefulWidget {
   const ClockEditor({super.key});
 
   @override
-  State<ClockEditor> createState() => _ClockEditorState();
+  ConsumerState<ClockEditor> createState() => _ClockEditorState();
 }
 
-class _ClockEditorState extends State<ClockEditor> {
+class _ClockEditorState extends ConsumerState<ClockEditor> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,8 +34,11 @@ class _ClockEditorState extends State<ClockEditor> {
                 spacing: 16,
                 children: [
                   _buildClockTemplate(ClockType.flex),
-                  _buildClockTemplate(ClockType.flex),
-                  _buildClockTemplate(ClockType.flex),
+                  _buildClockTemplate(ClockType.frameWeathervf),
+                  _buildClockTemplate(ClockType.growth),
+                  _buildClockTemplate(ClockType.inflatevf),
+                  _buildClockTemplate(ClockType.rotationgx),
+                  _buildClockTemplate(ClockType.rubyRegular),
                 ],
               ),
             ),
@@ -44,18 +49,24 @@ class _ClockEditorState extends State<ClockEditor> {
   }
 
   Widget _buildClockTemplate(ClockType clockType) {
-    return Container(
-      width: 300,
-      height: 200,
-      padding: EdgeInsets.all(16),
-      alignment: AlignmentGeometry.center,
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceContainer,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: FittedBox(
-        fit: BoxFit.contain,
-        child: Clock(clockType: clockType),
+    return Material(
+      child: InkWell(
+        onTap: () {
+          ref.read(clockProvider.notifier).setClockType(clockType);
+        },
+        child: Ink(
+          width: 300,
+          height: 200,
+          padding: EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.surfaceContainer,
+            borderRadius: BorderRadius.circular(16),
+          ),
+          child: FittedBox(
+            fit: BoxFit.contain,
+            child: Clock(clockType: clockType),
+          ),
+        ),
       ),
     );
   }
