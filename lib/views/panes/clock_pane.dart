@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
-import 'package:strontianite/providers/clock_provider.dart';
+import 'package:strontianite/providers/clock_type_provider.dart';
+import 'package:strontianite/providers/settings_provider.dart';
 import 'package:strontianite/views/battery_indicator.dart';
 import 'package:strontianite/views/clock.dart';
 import 'package:strontianite/views/clock_editor.dart';
@@ -10,7 +11,10 @@ class ClockPane extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final clockType = ref.watch(clockProvider);
+    final clockType = ref.watch(clockTypeProvider);
+    final displayBatteryIndicator = ref.watch(
+      settingsProvider.select((state) => state.displayBatteryIndicator),
+    );
 
     return GestureDetector(
       onLongPress: () {
@@ -26,20 +30,21 @@ class ClockPane extends ConsumerWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            Padding(
-              padding: const EdgeInsets.all(16),
-              child: Align(
-                alignment: AlignmentGeometry.centerRight,
-                child: SizedBox(
-                  width: 32,
-                  height: 16,
-                  child: Stack(
-                    alignment: AlignmentGeometry.center,
-                    children: [const BatteryIndicator()],
+            if (displayBatteryIndicator)
+              Padding(
+                padding: const EdgeInsets.all(16),
+                child: Align(
+                  alignment: AlignmentGeometry.centerRight,
+                  child: SizedBox(
+                    width: 32,
+                    height: 16,
+                    child: Stack(
+                      alignment: AlignmentGeometry.center,
+                      children: [const BatteryIndicator()],
+                    ),
                   ),
                 ),
               ),
-            ),
             Expanded(child: Clock(clockType: clockType)),
           ],
         ),

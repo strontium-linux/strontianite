@@ -2,7 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strontianite/enums/clock_type.dart';
 import 'package:strontianite/main.dart';
 
-class ClockTypeNotifier extends Notifier<ClockType> {
+class _ClockTypeNotifier extends Notifier<ClockType> {
   @override
   ClockType build() {
     final prefs = ref.read(sharedPreferencesProvider);
@@ -25,6 +25,6 @@ class ClockTypeNotifier extends Notifier<ClockType> {
   }
 }
 
-final clockProvider = NotifierProvider<ClockTypeNotifier, ClockType>(
-  ClockTypeNotifier.new,
+final clockTypeProvider = NotifierProvider<_ClockTypeNotifier, ClockType>(
+  _ClockTypeNotifier.new,
 );

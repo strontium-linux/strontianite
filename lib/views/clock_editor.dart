@@ -1,7 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:strontianite/enums/clock_type.dart';
-import 'package:strontianite/providers/clock_provider.dart';
+import 'package:strontianite/providers/clock_type_provider.dart';
+import 'package:strontianite/providers/settings_provider.dart';
 import 'package:strontianite/views/clock.dart';
 
 class ClockEditor extends ConsumerStatefulWidget {
@@ -14,6 +15,10 @@ class ClockEditor extends ConsumerStatefulWidget {
 class _ClockEditorState extends ConsumerState<ClockEditor> {
   @override
   Widget build(BuildContext context) {
+    final displayBatteryIndicator = ref.watch(
+      settingsProvider.select((state) => state.displayBatteryIndicator),
+    );
+
     return Scaffold(
       appBar: AppBar(
         title: Text('Edit clock'),
@@ -42,6 +47,18 @@ class _ClockEditorState extends ConsumerState<ClockEditor> {
                 ],
               ),
             ),
+            SwitchListTile(
+              value: displayBatteryIndicator,
+              title: const Text('Display battery indicator'),
+              subtitle: const Text(
+                'Display battery indicator in the top right of the screen',
+              ),
+              onChanged: (value) {
+                ref
+                    .read(settingsProvider.notifier)
+                    .updateBatteryPreference(value);
+              },
+            ),
           ],
         ),
       ),
@@ -55,7 +72,7 @@ class _ClockEditorState extends ConsumerState<ClockEditor> {
           ScaffoldMessenger.of(context).showSnackBar(
             const SnackBar(content: Text('Successfully set clock style')),
           );
-          await ref.read(clockProvider.notifier).setClockType(clockType);
+          await ref.read(clockTypeProvider.notifier).setClockType(clockType);
         },
         child: Ink(
           width: 300,
