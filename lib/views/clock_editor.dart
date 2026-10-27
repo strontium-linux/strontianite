@@ -51,8 +51,11 @@ class _ClockEditorState extends ConsumerState<ClockEditor> {
   Widget _buildClockTemplate(ClockType clockType) {
     return Material(
       child: InkWell(
-        onTap: () {
-          ref.read(clockProvider.notifier).setClockType(clockType);
+        onTap: () async {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Successfully set clock style')),
+          );
+          await ref.read(clockProvider.notifier).setClockType(clockType);
         },
         child: Ink(
           width: 300,
