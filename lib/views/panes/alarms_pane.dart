@@ -1,22 +1,22 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:strontianite/models/alarm.dart';
+import 'package:strontianite/providers/alarms_provider.dart';
 import 'package:strontianite/views/alarm_editor.dart';
 
-class AlarmsPane extends StatefulWidget {
+class AlarmsPane extends ConsumerStatefulWidget {
   const AlarmsPane({super.key});
 
   @override
-  State<AlarmsPane> createState() => _AlarmsPaneState();
+  ConsumerState<AlarmsPane> createState() => _AlarmsPaneState();
 }
 
-class _AlarmsPaneState extends State<AlarmsPane> {
-  final List<TimeOfDay> _alarms = [
-    TimeOfDay(hour: 2, minute: 30),
-    TimeOfDay(hour: 7, minute: 15),
-  ];
-
+class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
   @override
   Widget build(BuildContext context) {
+    final List<Alarm> alarms = ref.watch(alarmsProvider);
+
     return Align(
       alignment: AlignmentGeometry.topCenter,
       child: SingleChildScrollView(
@@ -25,7 +25,7 @@ class _AlarmsPaneState extends State<AlarmsPane> {
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           spacing: 16,
-          children: _alarms
+          children: alarms
               .map(
                 (a) => Material(
                   child: Ink(
@@ -39,7 +39,7 @@ class _AlarmsPaneState extends State<AlarmsPane> {
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) => AlarmEditor(initialTime: a),
+                            builder: (context) => AlarmEditor(alarm: a),
                           ),
                         );
                       },
@@ -50,7 +50,7 @@ class _AlarmsPaneState extends State<AlarmsPane> {
                           children: [
                             const Icon(M3EIcons.alarm_rounded),
                             Text(
-                              a.format(context),
+                              a.time.format(context),
                               style: TextStyle(
                                 color: Theme.of(context).colorScheme.onSurface,
                               ),

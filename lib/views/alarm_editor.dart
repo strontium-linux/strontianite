@@ -1,17 +1,18 @@
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
+import 'package:strontianite/models/alarm.dart';
 
 class AlarmEditor extends StatefulWidget {
-  const AlarmEditor({super.key, required this.initialTime});
+  const AlarmEditor({super.key, required this.alarm});
 
-  final TimeOfDay initialTime;
+  final Alarm alarm;
 
   @override
   State<AlarmEditor> createState() => _AlarmEditorState();
 }
 
 class _AlarmEditorState extends State<AlarmEditor> {
-  late TimeOfDay _time = widget.initialTime;
+  late TimeOfDay _time = widget.alarm.time;
 
   @override
   Widget build(BuildContext context) {
