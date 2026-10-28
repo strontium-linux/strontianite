@@ -148,6 +148,10 @@ class _MediaPaneState extends State<MediaPane> {
               textAlign: TextAlign.center,
             ),
           ),
+          Text(
+            _mediaInfo?.artist ?? 'Unknown Artist',
+            style: TextStyle(fontSize: 11),
+          ),
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16),
             child: SliderTheme(
@@ -180,7 +184,7 @@ class _MediaPaneState extends State<MediaPane> {
               ),
             ),
           ),
-          Text(_elapsed),
+          Text(_elapsed, style: TextStyle(fontSize: 11)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
