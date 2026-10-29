@@ -38,6 +38,20 @@ class _AlarmsNotifier extends Notifier<List<Alarm>> {
           }).toList(),
         );
   }
+
+  Future<void> deleteAlarm(String id) async {
+    final found = state.indexWhere((a) => a.id == id);
+    state = List<Alarm>.from(state)..removeAt(found);
+    await ref
+        .read(sharedPreferencesProvider)
+        .setStringList(
+          'alarms',
+          state.map((a) {
+            final map = a.toJson();
+            return jsonEncode(map);
+          }).toList(),
+        );
+  }
 }
 
 final alarmsProvider = NotifierProvider<_AlarmsNotifier, List<Alarm>>(

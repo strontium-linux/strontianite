@@ -13,9 +13,9 @@ class AlarmsPane extends ConsumerStatefulWidget {
   ConsumerState<AlarmsPane> createState() => _AlarmsPaneState();
 }
 
-class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
-  final Uuid uuid = Uuid();
+const _uuid = Uuid();
 
+class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
   @override
   Widget build(BuildContext context) {
     final List<Alarm> alarms = ref.watch(alarmsProvider);
@@ -32,37 +32,45 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
               spacing: 16,
               children: alarms
                   .map(
-                    (a) => Material(
-                      child: Ink(
-                        decoration: BoxDecoration(
-                          color: Theme.of(context).colorScheme.surfaceContainer,
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        child: InkWell(
-                          borderRadius: BorderRadius.circular(16),
-                          onTap: () {
-                            Navigator.push(
+                    (a) => Dismissible(
+                      key: Key(a.id),
+                      onDismissed: (direction) {
+                        ref.read(alarmsProvider.notifier).deleteAlarm(a.id);
+                      },
+                      child: Material(
+                        child: Ink(
+                          decoration: BoxDecoration(
+                            color: Theme.of(
                               context,
-                              MaterialPageRoute(
-                                builder: (context) => AlarmEditor(alarm: a),
-                              ),
-                            );
-                          },
-                          child: Container(
-                            padding: EdgeInsets.all(16),
-                            child: Row(
-                              spacing: 8,
-                              children: [
-                                const Icon(M3EIcons.alarm_rounded),
-                                Text(
-                                  a.time.format(context),
-                                  style: TextStyle(
-                                    color: Theme.of(
-                                      context,
-                                    ).colorScheme.onSurface,
-                                  ),
+                            ).colorScheme.surfaceContainer,
+                            borderRadius: BorderRadius.circular(16),
+                          ),
+                          child: InkWell(
+                            borderRadius: BorderRadius.circular(16),
+                            onTap: () {
+                              Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => AlarmEditor(alarm: a),
                                 ),
-                              ],
+                              );
+                            },
+                            child: Container(
+                              padding: EdgeInsets.all(16),
+                              child: Row(
+                                spacing: 8,
+                                children: [
+                                  const Icon(M3EIcons.alarm_rounded),
+                                  Text(
+                                    a.time.format(context),
+                                    style: TextStyle(
+                                      color: Theme.of(
+                                        context,
+                                      ).colorScheme.onSurface,
+                                    ),
+                                  ),
+                                ],
+                              ),
                             ),
                           ),
                         ),
@@ -83,7 +91,7 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
                 MaterialPageRoute(
                   builder: (context) => AlarmEditor(
                     alarm: Alarm(
-                      id: uuid.v4(),
+                      id: _uuid.v4(),
                       time: TimeOfDay.now(),
                       name: 'New Alarm',
                     ),

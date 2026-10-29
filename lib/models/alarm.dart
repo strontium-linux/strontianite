@@ -19,4 +19,12 @@ class Alarm {
       name: json['name'] ?? 'New Alarm',
     );
   }
+
+  Alarm copyWith({String? id, TimeOfDay? time, String? name}) {
+    return Alarm(
+      id: id ?? this.id,
+      time: time ?? this.time,
+      name: name ?? this.name,
+    );
+  }
 }

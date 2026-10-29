@@ -47,8 +47,10 @@ class _AlarmEditorState extends ConsumerState<AlarmEditor> {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          await ref.read(alarmsProvider.notifier).updateAlarm(widget.alarm);
+        onPressed: () {
+          final updated = widget.alarm.copyWith(time: _time);
+          ref.read(alarmsProvider.notifier).updateAlarm(updated);
+          Navigator.of(context).pop();
         },
         child: const Icon(M3EIcons.check_rounded),
       ),
