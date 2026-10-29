@@ -19,6 +19,25 @@ class _AlarmsNotifier extends Notifier<List<Alarm>> {
 
     return List.empty();
   }
+
+  Future<void> updateAlarm(Alarm alarm) async {
+    final found = state.indexWhere((a) => a.id == alarm.id);
+    if (found != -1) {
+      state[found] = alarm;
+    } else {
+      state = [...state, alarm];
+    }
+
+    await ref
+        .read(sharedPreferencesProvider)
+        .setStringList(
+          'alarms',
+          state.map((a) {
+            final map = a.toJson();
+            return jsonEncode(map);
+          }).toList(),
+        );
+  }
 }
 
 final alarmsProvider = NotifierProvider<_AlarmsNotifier, List<Alarm>>(

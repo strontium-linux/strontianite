@@ -9,14 +9,14 @@ class Alarm {
   final String name;
 
   Map<String, dynamic> toJson() {
-    return {'time': time, 'name': name};
+    return {'id': id, 'hour': time.hour, 'minute': time.minute, 'name': name};
   }
 
   factory Alarm.fromJson(Map<String, dynamic> json) {
     return Alarm(
       id: json['id'] ?? Uuid().v4(),
-      time: json['time'] ?? TimeOfDay.now(),
-      name: json['name'] ?? 'Untitled Alarm',
+      time: TimeOfDay(hour: json['hour'] ?? 0, minute: json['minute'] ?? 0),
+      name: json['name'] ?? 'New Alarm',
     );
   }
 }

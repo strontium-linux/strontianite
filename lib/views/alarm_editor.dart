@@ -1,24 +1,27 @@
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:strontianite/models/alarm.dart';
+import 'package:strontianite/providers/alarms_provider.dart';
 
-class AlarmEditor extends StatefulWidget {
-  const AlarmEditor({super.key, required this.alarm});
+class AlarmEditor extends ConsumerStatefulWidget {
+  const AlarmEditor({super.key, required this.alarm, this.newAlarm = false});
 
   final Alarm alarm;
+  final bool newAlarm;
 
   @override
-  State<AlarmEditor> createState() => _AlarmEditorState();
+  ConsumerState<AlarmEditor> createState() => _AlarmEditorState();
 }
 
-class _AlarmEditorState extends State<AlarmEditor> {
+class _AlarmEditorState extends ConsumerState<AlarmEditor> {
   late TimeOfDay _time = widget.alarm.time;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit alarm'),
+        title: Text(widget.newAlarm ? 'Create alarm' : 'Edit alarm'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: Padding(
@@ -42,6 +45,12 @@ class _AlarmEditorState extends State<AlarmEditor> {
             ),
           ],
         ),
+      ),
+      floatingActionButton: FloatingActionButton(
+        onPressed: () async {
+          await ref.read(alarmsProvider.notifier).updateAlarm(widget.alarm);
+        },
+        child: const Icon(M3EIcons.check_rounded),
       ),
     );
   }
