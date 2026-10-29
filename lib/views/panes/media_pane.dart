@@ -40,6 +40,7 @@ class _MediaPaneState extends State<MediaPane> {
     Shapes.c7SidedCookie,
     Shapes.c9SidedCookie,
     Shapes.circle,
+    Shapes.bun,
   ];
 
   int get _length {
