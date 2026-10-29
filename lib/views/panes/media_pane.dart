@@ -29,6 +29,18 @@ class _MediaPaneState extends State<MediaPane> {
   DateTime _ignorePositionUntil = DateTime.fromMillisecondsSinceEpoch(0);
   DateTime _ignorePlayStateUntil = DateTime.fromMillisecondsSinceEpoch(0);
   Shapes _currentShape = Shapes.pill;
+  final List<Shapes> _mediaShapes = [
+    Shapes.pill,
+    Shapes.arrow,
+    Shapes.arch,
+    Shapes.square,
+    Shapes.semicircle,
+    Shapes.c4SidedCookie,
+    Shapes.c6SidedCookie,
+    Shapes.c7SidedCookie,
+    Shapes.c9SidedCookie,
+    Shapes.circle,
+  ];
 
   int get _length {
     final l = _mediaInfo?.length ?? 0;
@@ -381,7 +393,7 @@ class _MediaPaneState extends State<MediaPane> {
   void _changeShape() {
     setState(() {
       debugPrint('Changing shape');
-      final options = Shapes.values.where((s) => s != _currentShape).toList();
+      final options = _mediaShapes.where((s) => s != _currentShape).toList();
       _currentShape = options[Random().nextInt(options.length)];
       debugPrint('Current shape: $_currentShape');
     });

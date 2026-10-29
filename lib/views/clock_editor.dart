@@ -74,6 +74,7 @@ class _ClockEditorState extends ConsumerState<ClockEditor> {
           );
           await ref.read(clockTypeProvider.notifier).setClockType(clockType);
         },
+        borderRadius: BorderRadius.circular(16),
         child: Ink(
           width: 300,
           height: 200,
