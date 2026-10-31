@@ -18,6 +18,9 @@ class _ClockEditorState extends ConsumerState<ClockEditor> {
     final displayBatteryIndicator = ref.watch(
       settingsProvider.select((state) => state.displayBatteryIndicator),
     );
+    final isHorizontal = ref.watch(
+      settingsProvider.select((state) => state.isHorizontal),
+    );
 
     return Scaffold(
       appBar: AppBar(
@@ -57,6 +60,16 @@ class _ClockEditorState extends ConsumerState<ClockEditor> {
                 ref
                     .read(settingsProvider.notifier)
                     .updateBatteryPreference(value);
+              },
+            ),
+            SwitchListTile(
+              value: isHorizontal,
+              title: const Text('Horizontal clock face'),
+              subtitle: const Text('Set clock face orientation to horizontal'),
+              onChanged: (value) {
+                ref
+                    .read(settingsProvider.notifier)
+                    .updateHorizontalPreference(value);
               },
             ),
           ],

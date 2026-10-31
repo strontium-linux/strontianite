@@ -14,11 +14,20 @@ class _SettingsNotifier extends Notifier<SettingsState> {
       return SettingsState.fromJson(settings);
     }
 
-    return const SettingsState(displayBatteryIndicator: true);
+    return const SettingsState(
+      displayBatteryIndicator: true,
+      isHorizontal: false,
+    );
   }
 
   Future<void> updateBatteryPreference(bool enabled) async {
     state = state.copyWith(displayBatteryIndicator: enabled);
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString('global_settings', jsonEncode(state.toJson()));
+  }
+
+  Future<void> updateHorizontalPreference(bool isHorizontal) async {
+    state = state.copyWith(isHorizontal: isHorizontal);
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setString('global_settings', jsonEncode(state.toJson()));
   }

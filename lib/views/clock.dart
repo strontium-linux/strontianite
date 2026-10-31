@@ -1,19 +1,21 @@
 import 'dart:async';
 
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:intl/intl.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:strontianite/enums/clock_type.dart';
+import 'package:strontianite/providers/settings_provider.dart';
 
-class Clock extends StatefulWidget {
+class Clock extends ConsumerStatefulWidget {
   const Clock({super.key, required this.clockType});
 
   final ClockType clockType;
 
   @override
-  State<Clock> createState() => _ClockState();
+  ConsumerState<Clock> createState() => _ClockState();
 }
 
-class _ClockState extends State<Clock> {
+class _ClockState extends ConsumerState<Clock> {
   late Timer _timer;
 
   late DateTime _currentTime;
@@ -29,32 +31,15 @@ class _ClockState extends State<Clock> {
 
   @override
   Widget build(BuildContext context) {
+    final isHorizontal = ref.watch(
+      settingsProvider.select((state) => state.isHorizontal),
+    );
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.center,
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(
-          DateFormat('HH').format(_currentTime),
-          style: TextStyle(
-            fontFamily: _getFont(widget.clockType),
-            fontSize: 80,
-            height: 0.9,
-            color: Theme.of(context).colorScheme.primary,
-            fontVariations: [FontVariation('ROND', 100)],
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
-        ),
-        Text(
-          DateFormat('mm').format(_currentTime),
-          style: TextStyle(
-            fontFamily: _getFont(widget.clockType),
-            fontSize: 80,
-            height: 0.9,
-            color: Theme.of(context).colorScheme.primary,
-            fontVariations: [FontVariation('ROND', 100)],
-            fontFeatures: [FontFeature.tabularFigures()],
-          ),
-        ),
+        isHorizontal ? _buildClockHorizontal() : _buildClockVertical(),
         Padding(
           padding: const EdgeInsets.only(top: 16),
           child: Row(
@@ -103,5 +88,50 @@ class _ClockState extends State<Clock> {
       case ClockType.rubyRegular:
         return 'Ruby Regu;ar';
     }
+  }
+
+  Widget _buildClockVertical() {
+    return Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      crossAxisAlignment: CrossAxisAlignment.center,
+      children: [
+        Text(
+          DateFormat('HH').format(_currentTime),
+          style: TextStyle(
+            fontFamily: _getFont(widget.clockType),
+            fontSize: 112,
+            height: 0.9,
+            color: Theme.of(context).colorScheme.primary,
+            fontVariations: [FontVariation('ROND', 100)],
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+        ),
+        Text(
+          DateFormat('mm').format(_currentTime),
+          style: TextStyle(
+            fontFamily: _getFont(widget.clockType),
+            fontSize: 112,
+            height: 0.9,
+            color: Theme.of(context).colorScheme.primary,
+            fontVariations: [FontVariation('ROND', 100)],
+            fontFeatures: [FontFeature.tabularFigures()],
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildClockHorizontal() {
+    return Text(
+      DateFormat('HH:mm').format(_currentTime),
+      style: TextStyle(
+        fontFamily: _getFont(widget.clockType),
+        fontSize: 128,
+        height: 0.9,
+        color: Theme.of(context).colorScheme.primary,
+        fontVariations: [FontVariation('ROND', 100)],
+        fontFeatures: [FontFeature.tabularFigures()],
+      ),
+    );
   }
 }
