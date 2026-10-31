@@ -24,7 +24,7 @@ class _ClockEditorState extends ConsumerState<ClockEditor> {
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Edit clock'),
+        title: const Text('Edit clock'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
       body: SingleChildScrollView(

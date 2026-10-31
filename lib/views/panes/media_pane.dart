@@ -29,19 +29,7 @@ class _MediaPaneState extends State<MediaPane> {
   int? _seekPosition;
   DateTime _ignorePositionUntil = DateTime.fromMillisecondsSinceEpoch(0);
   DateTime _ignorePlayStateUntil = DateTime.fromMillisecondsSinceEpoch(0);
-  Shapes _currentShape = Shapes.pill;
-  final List<Shapes> _mediaShapes = [
-    Shapes.pill,
-    Shapes.arrow,
-    Shapes.arch,
-    Shapes.square,
-    Shapes.c4SidedCookie,
-    Shapes.c6SidedCookie,
-    Shapes.c7SidedCookie,
-    Shapes.c9SidedCookie,
-    Shapes.circle,
-    Shapes.bun,
-  ];
+  final Shapes _currentShape = Shapes.pill;
 
   int get _length {
     final l = _mediaInfo?.length ?? 0;
@@ -133,8 +121,6 @@ class _MediaPaneState extends State<MediaPane> {
         setState(() {});
       }
     });
-
-    _changeShape();
   }
 
   @override
@@ -281,7 +267,6 @@ class _MediaPaneState extends State<MediaPane> {
 
   Widget _buildImage() {
     return GestureDetector(
-      onTap: _changeShape,
       child: M3EContainer(
         key: ValueKey(_currentShape),
         _currentShape,
@@ -423,14 +408,5 @@ class _MediaPaneState extends State<MediaPane> {
     _posStopwatch
       ..reset()
       ..start();
-  }
-
-  void _changeShape() {
-    setState(() {
-      debugPrint('Changing shape');
-      final options = _mediaShapes.where((s) => s != _currentShape).toList();
-      _currentShape = options[Random().nextInt(options.length)];
-      debugPrint('Current shape: $_currentShape');
-    });
   }
 }

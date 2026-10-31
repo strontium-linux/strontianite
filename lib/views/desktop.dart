@@ -3,6 +3,7 @@ import 'package:strontianite/views/panel.dart';
 import 'package:strontianite/views/panes/alarms_pane.dart';
 import 'package:strontianite/views/panes/clock_pane.dart';
 import 'package:strontianite/views/panes/media_pane.dart';
+import 'package:strontianite/views/panes/ytm_pane.dart';
 
 class Desktop extends StatefulWidget {
   const Desktop({super.key});
@@ -12,7 +13,12 @@ class Desktop extends StatefulWidget {
 }
 
 class _DesktopState extends State<Desktop> {
-  final List<Widget> _panels = [ClockPane(), MediaPane(), AlarmsPane()];
+  final List<Widget> _panels = [
+    ClockPane(),
+    MediaPane(),
+    AlarmsPane(),
+    YtmPane(),
+  ];
   late PageController _pageController;
 
   @override

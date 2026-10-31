@@ -50,13 +50,13 @@ class Panel extends StatelessWidget {
             //     switchPane(2);
             //   },
             // ),
-            // AppIcon(
-            //   name: 'YouTube Music',
-            //   icon: M3EIcons.music_note_rounded,
-            //   exec: () {
-            //     switchPane(2);
-            //   },
-            // ),
+            AppIcon(
+              name: 'YouTube Music',
+              icon: M3EIcons.music_note_rounded,
+              exec: () {
+                switchPane(3);
+              },
+            ),
           ],
         ),
       ),

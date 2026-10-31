@@ -32,6 +32,8 @@ android {
             signingConfig = signingConfigs.getByName("debug")
         }
     }
+
+    compileSdk = 37
 }
 
 kotlin {

@@ -17,6 +17,7 @@ class _SettingsNotifier extends Notifier<SettingsState> {
     return const SettingsState(
       displayBatteryIndicator: true,
       isHorizontal: false,
+      youtubeCookie: '',
     );
   }
 
@@ -28,6 +29,12 @@ class _SettingsNotifier extends Notifier<SettingsState> {
 
   Future<void> updateHorizontalPreference(bool isHorizontal) async {
     state = state.copyWith(isHorizontal: isHorizontal);
+    final prefs = ref.read(sharedPreferencesProvider);
+    await prefs.setString('global_settings', jsonEncode(state.toJson()));
+  }
+
+  Future<void> updateYoutubeCookie(String youtubeCookie) async {
+    state = state.copyWith(youtubeCookie: youtubeCookie);
     final prefs = ref.read(sharedPreferencesProvider);
     await prefs.setString('global_settings', jsonEncode(state.toJson()));
   }
