@@ -17,6 +17,7 @@ dependencies:
   just_tooltip: ^0.4.4
   material_3_expressive: ^1.0.7
   material_ui: ^0.0.1
+  permission_handler: ^13.0.2
   playerctl: ^1.2.1
   scaled_app: ^2.3.2
   shared_preferences: ^2.5.6

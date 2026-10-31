@@ -19,8 +19,6 @@ class MediaUtils {
       _manager.stateStream.listen((state) {
         lastInfo = state.currentMedia;
       });
-    } else if (Platform.isAndroid) {
-      await fmc.FlutterMediaController.requestPermissions();
     }
   }
 

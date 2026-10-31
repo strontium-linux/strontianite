@@ -5,6 +5,7 @@ import 'dart:math';
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:playerctl/playerctl.dart';
 import 'package:strontianite/utils/media_utils.dart';
 import 'package:flutter_media_controller/flutter_media_controller.dart' as fmc;
@@ -34,7 +35,6 @@ class _MediaPaneState extends State<MediaPane> {
     Shapes.arrow,
     Shapes.arch,
     Shapes.square,
-    Shapes.semicircle,
     Shapes.c4SidedCookie,
     Shapes.c6SidedCookie,
     Shapes.c7SidedCookie,
@@ -235,6 +235,14 @@ class _MediaPaneState extends State<MediaPane> {
       M3EIconButton(
         variant: M3EIconButtonVariant.filled,
         onPressed: () async {
+          if (Platform.isAndroid) {
+            final status = await Permission.notification.status;
+            if (!status.isGranted) {
+              _showPermissionDialog();
+              return;
+            }
+          }
+
           if (_isPlaying) {
             if (mounted) {
               setState(() {
@@ -263,7 +271,7 @@ class _MediaPaneState extends State<MediaPane> {
         icon: const Icon(M3EIcons.skip_next_rounded),
       ),
       M3EIconButton(
-        onPressed: () async {
+        onPressed: () {
           _showVolumeDialog();
         },
         icon: const Icon(M3EIcons.volume_up_rounded),
@@ -367,6 +375,32 @@ class _MediaPaneState extends State<MediaPane> {
               crossAxisAlignment: CrossAxisAlignment.center,
               spacing: 8,
               children: [Icon(M3EIcons.check_rounded), Text('OK')],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showPermissionDialog() {
+    showDialog(
+      context: context,
+      builder: (context) => M3EDialog(
+        title: 'Permission required',
+        content: const Text(
+          'Strontianite requires the notification permission to control your media',
+        ),
+        actions: [
+          M3EButton.filled(
+            onPressed: () async {
+              fmc.FlutterMediaController.requestPermissions();
+              if (mounted) Navigator.pop(context);
+            },
+            child: const Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              crossAxisAlignment: CrossAxisAlignment.center,
+              spacing: 8,
+              children: [Icon(M3EIcons.check_rounded), Text('Grant')],
             ),
           ),
         ],
