@@ -10,7 +10,11 @@ class SettingsState {
   final String youtubeCookie;
 
   Map<String, dynamic> toJson() {
-    return {'displayBatteryIndicator': displayBatteryIndicator};
+    return {
+      'displayBatteryIndicator': displayBatteryIndicator,
+      'isHorizontal': isHorizontal,
+      'youtubeCookie': youtubeCookie,
+    };
   }
 
   factory SettingsState.fromJson(Map<String, dynamic> json) {
