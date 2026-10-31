@@ -36,6 +36,7 @@ class MyAudioHandler extends BaseAudioHandler with SeekHandler {
     required String title,
     required String artist,
     required String album,
+    required Duration duration,
     String? artUri,
   }) {
     mediaItem.add(
@@ -45,6 +46,7 @@ class MyAudioHandler extends BaseAudioHandler with SeekHandler {
         album: album,
         artist: artist,
         artUri: artUri != null ? Uri.parse(artUri) : null,
+        duration: duration,
       ),
     );
   }

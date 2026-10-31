@@ -39,6 +39,7 @@ class YtmUtils {
       final artist = await yt.author;
       final artUri = await yt.thumbnailUrl;
       final streams = await yt.streams;
+      final length = await yt.length;
       final audioStream =
           streams.getAudioOnly(subtype: 'mp4') ?? streams.bestAudio;
       if (audioStream != null) {
@@ -51,6 +52,7 @@ class YtmUtils {
           artist: artist,
           album: 'Unknown album',
           artUri: artUri,
+          duration: Duration(seconds: length),
         );
       } else {
         debugPrint('Audio stream is null.');
