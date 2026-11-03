@@ -1,6 +1,8 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:strontianite/models/play_model.dart';
 import 'package:strontianite/utils/ytm_utils.dart';
+import 'package:strontianite/views/now_playing.dart';
 import 'package:strontianite/views/ytm_settings.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 
@@ -14,10 +16,15 @@ class YtmPane extends StatefulWidget {
 class _YtmPaneState extends State<YtmPane> {
   List<Video> _content = List.empty();
   final _controller = SearchController();
+  final ValueNotifier<PlayModel> _playTrigger = ValueNotifier(
+    PlayModel(title: 'Not playing', artist: 'Unknown artist', thumbnail: null),
+  );
+  late NowPlaying _nowPlaying;
 
   @override
   void initState() {
     super.initState();
+    _nowPlaying = NowPlaying(playTrigger: _playTrigger);
   }
 
   @override
@@ -80,12 +87,13 @@ class _YtmPaneState extends State<YtmPane> {
                   title: Text(c.title),
                   subtitle: Text(c.author),
                   onTap: () {
-                    YtmUtils.play(c.id);
+                    YtmUtils.play(c.id.toString(), _nowPlaying.playTrigger);
                   },
                 );
               },
             ),
           ),
+          _nowPlaying,
         ],
       ),
     );

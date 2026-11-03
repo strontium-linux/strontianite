@@ -6,6 +6,7 @@ import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:strontianite/handlers/audio_handler.dart';
+import 'package:strontianite/utils/ytm_utils.dart';
 import 'package:strontianite/views/desktop.dart';
 
 final sharedPreferencesProvider = Provider<SharedPreferences>((ref) {
@@ -46,9 +47,14 @@ void main() async {
   );
 }
 
-class MainApp extends StatelessWidget {
+class MainApp extends StatefulWidget {
   const MainApp({super.key});
 
+  @override
+  State<MainApp> createState() => _MainAppState();
+}
+
+class _MainAppState extends State<MainApp> {
   @override
   Widget build(BuildContext context) {
     return M3EMaterialApp(
@@ -61,5 +67,12 @@ class MainApp extends StatelessWidget {
       drawUnderSystemBars: true,
       home: SafeArea(child: Scaffold(body: Desktop())),
     );
+  }
+
+  @override
+  void dispose() {
+    audioHandler.stop();
+    YtmUtils.dispose();
+    super.dispose();
   }
 }

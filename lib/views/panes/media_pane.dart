@@ -145,11 +145,15 @@ class _MediaPaneState extends State<MediaPane> {
                 fontVariations: [FontVariation('ROND', 100)],
               ),
               textAlign: TextAlign.center,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
           Text(
             _mediaInfo?.artist ?? 'Unknown Artist',
             style: TextStyle(fontSize: 11),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
           ),
           Padding(
             padding: const EdgeInsets.only(left: 16, right: 16),
@@ -270,9 +274,9 @@ class _MediaPaneState extends State<MediaPane> {
       child: M3EContainer(
         key: ValueKey(_currentShape),
         _currentShape,
-        width: 100,
-        height: 100,
-        child: _buildImageCore(),
+        child: ClipOval(
+          child: SizedBox.square(dimension: 100, child: _buildImageCore()),
+        ),
       ),
     );
   }
@@ -293,12 +297,24 @@ class _MediaPaneState extends State<MediaPane> {
 
     switch (uri.scheme) {
       case 'file':
-        return Image.file(File(uri.toFilePath()), errorBuilder: fallback);
+        return Image.file(
+          File(uri.toFilePath()),
+          errorBuilder: fallback,
+          fit: BoxFit.cover,
+        );
       case 'http':
       case 'https':
-        return Image.network(_mediaInfo!.artUrl!, errorBuilder: fallback);
+        return Image.network(
+          _mediaInfo!.artUrl!,
+          errorBuilder: fallback,
+          fit: BoxFit.cover,
+        );
       case 'data':
-        return Image.memory(uri.data!.contentAsBytes(), errorBuilder: fallback);
+        return Image.memory(
+          uri.data!.contentAsBytes(),
+          errorBuilder: fallback,
+          fit: BoxFit.cover,
+        );
       default:
         return _buildDefaultImage();
     }
