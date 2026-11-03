@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 
 import 'package:darttubefix/darttubefix.dart';
 import 'package:flutter/foundation.dart';
@@ -21,9 +22,9 @@ class YtmUtils {
   static String _artist = 'Unknown artist';
   static String? _thumbnail;
   static String? _related;
-  static bool _loadPlaying = false;
   static bool _listening = false;
   static ValueNotifier<PlayModel>? _callback;
+  static late Function(bool isLoading) _onLoaded;
 
   static Future<List<String>> getSuggestions(String query) async {
     debugPrint('Searching: $query');
@@ -44,11 +45,14 @@ class YtmUtils {
   static Future<void> play(
     String id,
     ValueNotifier<PlayModel> playCallback,
+    Function(bool isLoading) onLoaded,
   ) async {
-    _loadPlaying = true;
     _related = null;
     _callback = playCallback;
+    _onLoaded = onLoaded;
     _ensureListener();
+
+    onLoaded(true);
 
     final cookie = container.read(settingsProvider).youtubeCookie;
     final player = audioHandler.getPlayer();
@@ -93,7 +97,7 @@ class YtmUtils {
     } catch (e) {
       debugPrint(e.toString());
     } finally {
-      _loadPlaying = false;
+      onLoaded(false);
     }
   }
 
@@ -138,7 +142,7 @@ class YtmUtils {
       debugPrint('Related is null');
       return;
     }
-    await play(_related!, callback);
+    await play(_related!, callback, _onLoaded);
   }
 
   static void _ensureListener() {
@@ -175,7 +179,7 @@ class YtmUtils {
         json['contents']?['singleColumnMusicWatchNextResultsRenderer']?['tabbedRenderer']?['watchNextTabbedResultsRenderer']?['tabs']?[0]?['tabRenderer']?['content']?['musicQueueRenderer']?['content']?['playlistPanelRenderer'];
     final contents = (panel?['contents'] as List?) ?? [];
 
-    final next = contents[1];
+    final next = contents[Random().nextInt(contents.length)];
     if (next == null) return null;
 
     final r =

@@ -1,5 +1,7 @@
+import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:skeletonizer/skeletonizer.dart';
 import 'package:strontianite/models/play_model.dart';
 import 'package:strontianite/utils/ytm_utils.dart';
 import 'package:strontianite/views/now_playing.dart';
@@ -24,11 +26,16 @@ class _YtmPaneState extends State<YtmPane> {
     ),
   );
   late NowPlaying _nowPlaying;
+  final ValueNotifier<bool> _loadTrigger = ValueNotifier(false);
+  bool _isResultsLoading = false;
 
   @override
   void initState() {
     super.initState();
-    _nowPlaying = NowPlaying(playTrigger: _playTrigger);
+    _nowPlaying = NowPlaying(
+      playTrigger: _playTrigger,
+      loadTrigger: _loadTrigger,
+    );
   }
 
   @override
@@ -83,18 +90,46 @@ class _YtmPaneState extends State<YtmPane> {
             },
           ),
           Expanded(
-            child: ListView.builder(
-              itemCount: _content.length,
-              itemBuilder: (context, i) {
-                final c = _content[i];
-                return ListTile(
-                  title: Text(c.title),
-                  subtitle: Text(c.author),
-                  onTap: () {
-                    YtmUtils.play(c.id.toString(), _nowPlaying.playTrigger);
-                  },
-                );
-              },
+            child: Skeletonizer(
+              enabled: _isResultsLoading,
+              effect: ShimmerEffect(),
+              child: ListView.builder(
+                itemCount: _isResultsLoading ? 4 : _content.length,
+                itemBuilder: (context, i) {
+                  final c = _isResultsLoading ? null : _content[i];
+                  return ListTile(
+                    leading: M3EContainer.circle(
+                      width: 40,
+                      height: 40,
+                      child: ClipOval(
+                        child: SizedBox.square(
+                          dimension: 40,
+                          child: c != null
+                              ? Image.network(
+                                  c.thumbnails.mediumResUrl,
+                                  fit: BoxFit.cover,
+                                )
+                              : const Icon(M3EIcons.music_note_rounded),
+                        ),
+                      ),
+                    ),
+                    title: Text(c?.title ?? 'Cool Song Title'),
+                    subtitle: Text(
+                      c?.author ?? 'Author 1, Author 2 & Author 3',
+                    ),
+                    onTap: () {
+                      if (c == null) return;
+                      YtmUtils.play(c.id.toString(), _nowPlaying.playTrigger, (
+                        isLoading,
+                      ) {
+                        setState(() {
+                          _loadTrigger.value = isLoading;
+                        });
+                      });
+                    },
+                  );
+                },
+              ),
             ),
           ),
           _nowPlaying,
@@ -104,9 +139,13 @@ class _YtmPaneState extends State<YtmPane> {
   }
 
   Future<void> _search(String query) async {
+    setState(() {
+      _isResultsLoading = true;
+    });
     final results = await YtmUtils.search(query);
     setState(() {
       _content = results;
+      _isResultsLoading = false;
     });
   }
 }

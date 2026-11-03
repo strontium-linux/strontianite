@@ -90,12 +90,12 @@ BEGIN
         BLOCK "040904e4"
         BEGIN
             VALUE "CompanyName", "com.example" "\0"
-            VALUE "FileDescription", "turtlinux_shell" "\0"
+            VALUE "FileDescription", "strontianite" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "turtlinux_shell" "\0"
+            VALUE "InternalName", "strontianite" "\0"
             VALUE "LegalCopyright", "Copyright (C) 2026 com.example. All rights reserved." "\0"
-            VALUE "OriginalFilename", "turtlinux_shell.exe" "\0"
-            VALUE "ProductName", "turtlinux_shell" "\0"
+            VALUE "OriginalFilename", "strontianite.exe" "\0"
+            VALUE "ProductName", "strontianite" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

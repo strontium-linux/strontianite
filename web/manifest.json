@@ -1,6 +1,6 @@
 {
-    "name": "turtlinux_shell",
-    "short_name": "turtlinux_shell",
+    "name": "strontianite",
+    "short_name": "strontianite",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#0175C2",

@@ -8,9 +8,14 @@ import 'package:strontianite/models/play_model.dart';
 import 'package:strontianite/utils/ytm_utils.dart';
 
 class NowPlaying extends StatefulWidget {
-  const NowPlaying({super.key, required this.playTrigger});
+  const NowPlaying({
+    super.key,
+    required this.playTrigger,
+    required this.loadTrigger,
+  });
 
   final ValueNotifier<PlayModel> playTrigger;
+  final ValueNotifier<bool> loadTrigger;
 
   @override
   State<NowPlaying> createState() => _NowPlayingState();
@@ -54,26 +59,40 @@ class _NowPlayingState extends State<NowPlaying> {
             color: Theme.of(context).colorScheme.surfaceContainer,
             borderRadius: BorderRadius.circular(16),
           ),
-          padding: EdgeInsets.all(16),
+          padding: EdgeInsets.all(8),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.start,
             crossAxisAlignment: CrossAxisAlignment.center,
             spacing: 16,
             children: [
-              M3EContainer.circle(
-                width: 32,
-                height: 32,
-                color: Theme.of(context).colorScheme.primaryContainer,
-                child: value.thumbnail != null
-                    ? ClipOval(
-                        child: Image.network(
-                          value.thumbnail!,
-                          fit: BoxFit.cover,
-                          width: 32,
-                          height: 32,
-                        ),
-                      )
-                    : const Icon(M3EIcons.music_note_rounded),
+              Stack(
+                alignment: AlignmentGeometry.center,
+                children: [
+                  ValueListenableBuilder(
+                    valueListenable: widget.loadTrigger,
+                    builder: (context, value, child) {
+                      return M3EProgressIndicator.circularWavy(
+                        value: value == true ? null : _sliderValue,
+                        size: 56,
+                      );
+                    },
+                  ),
+                  M3EContainer.circle(
+                    width: 32,
+                    height: 32,
+                    color: Theme.of(context).colorScheme.primaryContainer,
+                    child: value.thumbnail != null
+                        ? ClipOval(
+                            child: Image.network(
+                              value.thumbnail!,
+                              fit: BoxFit.cover,
+                              width: 32,
+                              height: 32,
+                            ),
+                          )
+                        : const Icon(M3EIcons.music_note_rounded),
+                  ),
+                ],
               ),
               SizedBox(
                 width: 144,

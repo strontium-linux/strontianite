@@ -31,6 +31,7 @@ dependencies:
   playerctl: ^1.2.1
   scaled_app: ^2.3.2
   shared_preferences: ^2.5.6
+  skeletonizer: ^3.0.0
   uuid: ^4.6.0
   youtube_explode_dart: ^3.1.0
   youtube_music_explode_dart:

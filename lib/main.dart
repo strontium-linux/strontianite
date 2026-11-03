@@ -59,7 +59,7 @@ class _MainAppState extends State<MainApp> {
   Widget build(BuildContext context) {
     return M3EMaterialApp(
       debugShowCheckedModeBanner: false,
-      title: 'TurtLinux Shell',
+      title: 'Strontianite',
       data: M3EThemeData(colorScheme: .fromSeed(Color(0xFF00A1BC))),
       fontFamily: 'Google Sans Flex',
       autoTheming: true,
