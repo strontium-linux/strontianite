@@ -17,7 +17,11 @@ class _YtmPaneState extends State<YtmPane> {
   List<Video> _content = List.empty();
   final _controller = SearchController();
   final ValueNotifier<PlayModel> _playTrigger = ValueNotifier(
-    PlayModel(title: 'Not playing', artist: 'Unknown artist', thumbnail: null),
+    PlayModel(
+      title: YtmUtils.getTitle(),
+      artist: YtmUtils.getArtist(),
+      thumbnail: YtmUtils.getThumbnail(),
+    ),
   );
   late NowPlaying _nowPlaying;
 

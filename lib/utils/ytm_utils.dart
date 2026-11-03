@@ -126,11 +126,10 @@ class YtmUtils {
   }
 
   static void setPlaying(bool playing) {
-    final player = audioHandler.getPlayer();
     if (playing) {
-      player.play();
+      audioHandler.play();
     } else {
-      player.pause();
+      audioHandler.pause();
     }
   }
 
@@ -187,11 +186,18 @@ class YtmUtils {
   }
 
   static Future<void> seekTo(double percent) async {
+    final position = getDurationFromPercentage(percent);
+    await audioHandler.seek(position);
+  }
+
+  static Duration getDurationFromPercentage(double percent) {
     final player = audioHandler.getPlayer();
     final position = Duration(
-      microseconds: (percent * (player.duration?.inMicroseconds ?? 1)).round(),
+      microseconds:
+          ((percent.clamp(0.0, 1.0)) * (player.duration?.inMicroseconds ?? 1))
+              .round(),
     );
-    await audioHandler.seek(position);
+    return position;
   }
 
   static void dispose() {

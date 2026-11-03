@@ -22,6 +22,11 @@ class _NowPlayingState extends State<NowPlaying> {
   late Timer _updateTimer;
   bool _isSeeking = false;
 
+  String get _sliderLabel {
+    final duration = YtmUtils.getDurationFromPercentage(_sliderValue);
+    return '${duration.inSeconds}s';
+  }
+
   @override
   void initState() {
     super.initState();
@@ -103,7 +108,7 @@ class _NowPlayingState extends State<NowPlaying> {
                   ),
                   child: M3ESlider(
                     value: _sliderValue,
-                    label: '${_sliderValue}s',
+                    label: _sliderLabel,
                     onChanged: (value) {
                       _isSeeking = true;
                       setState(() {
