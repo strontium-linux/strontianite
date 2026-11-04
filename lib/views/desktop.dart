@@ -1,4 +1,8 @@
 import 'package:material_ui/material_ui.dart';
+import 'package:strontianite/handlers/alarms_handler.dart';
+import 'package:strontianite/main.dart';
+import 'package:strontianite/providers/alarms_provider.dart';
+import 'package:strontianite/views/alarm_ringing.dart';
 import 'package:strontianite/views/panel.dart';
 import 'package:strontianite/views/panes/alarms_pane.dart';
 import 'package:strontianite/views/panes/clock_pane.dart';
@@ -25,6 +29,15 @@ class _DesktopState extends State<Desktop> {
   void initState() {
     super.initState();
     _pageController = PageController();
+    AlarmsHandler.ringEvents.listen((id) {
+      final alarm = container.read(alarmsProvider.notifier).getAlarm(id);
+      if (mounted) {
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => AlarmRinging(alarm: alarm)),
+        );
+      }
+    });
   }
 
   @override

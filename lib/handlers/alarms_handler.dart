@@ -1,5 +1,8 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
+import 'dart:ui';
 
 import 'package:android_alarm_manager_plus/android_alarm_manager_plus.dart';
 import 'package:cron/cron.dart';
@@ -14,10 +17,16 @@ class AlarmsHandler {
   static final Map<String, int> _androidAlarms = {};
   static final Map<String, ScheduledTask> _linuxAlarms = {};
   static final _alarmPlayer = AudioPlayer();
-  static late Function(Alarm alarm) _onRing;
+  static final _controller = StreamController<String>.broadcast();
+  static Stream<String> get ringEvents => _controller.stream;
+  static final _portName = 'alarms_port';
+  static final _alarmPort = ReceivePort();
 
-  static void init(Function(Alarm alarm) cb) {
-    _onRing = cb;
+  static void init() {
+    IsolateNameServer.removePortNameMapping(_portName);
+    IsolateNameServer.registerPortWithName(_alarmPort.sendPort, _portName);
+
+    _alarmPort.listen((message) => _controller.add(message));
   }
 
   static Future<void> registerAlarm(Alarm alarm) async {
@@ -32,7 +41,7 @@ class AlarmsHandler {
     } else {
       _linuxAlarms[alarm.id] = _cron.schedule(
         Schedule.parse('${alarm.time.minute} ${alarm.time.hour} * * *'),
-        _ring,
+        () => _ring(alarm.id),
       );
     }
   }
@@ -73,14 +82,15 @@ class AlarmsHandler {
         .getAlarm(params['id']);
 
     await _androidScheduleNextDaily(alarm);
-    await _ring();
+    await _ring(params['id']);
   }
 
   @pragma('vm:entry-point')
-  static Future<void> _ring() async {
+  static Future<void> _ring(String id) async {
     debugPrint('Alarm ringing');
     await _alarmPlayer.setAsset('assets/audio/argon.ogg');
     _alarmPlayer.play();
+    IsolateNameServer.lookupPortByName(_portName)?.send(id);
   }
 
   static int _uuidToInt(String uuid) {
@@ -99,5 +109,9 @@ class AlarmsHandler {
     } else if (Platform.isLinux) {
       await _linuxAlarms.remove(id)?.cancel();
     }
+  }
+
+  static Future<void> dismiss() async {
+    await _alarmPlayer.stop();
   }
 }

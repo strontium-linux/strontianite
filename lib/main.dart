@@ -5,6 +5,7 @@ import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:scaled_app/scaled_app.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:strontianite/handlers/alarms_handler.dart';
 import 'package:strontianite/handlers/audio_handler.dart';
 import 'package:strontianite/utils/ytm_utils.dart';
 import 'package:strontianite/views/desktop.dart';
@@ -41,6 +42,8 @@ void main() async {
       androidNotificationOngoing: true,
     ),
   );
+
+  AlarmsHandler.init();
 
   runApp(
     UncontrolledProviderScope(container: container, child: const MainApp()),
