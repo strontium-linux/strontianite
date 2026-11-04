@@ -22,65 +22,80 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
 
     return Stack(
       children: [
-        Align(
-          alignment: AlignmentGeometry.topCenter,
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(16),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.start,
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              spacing: 16,
-              children: alarms
-                  .map(
-                    (a) => Dismissible(
-                      key: Key(a.id),
-                      onDismissed: (direction) {
-                        ref.read(alarmsProvider.notifier).deleteAlarm(a.id);
-                      },
-                      child: Material(
-                        child: Ink(
-                          decoration: BoxDecoration(
-                            color: Theme.of(
-                              context,
-                            ).colorScheme.surfaceContainer,
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: InkWell(
-                            borderRadius: BorderRadius.circular(16),
-                            onTap: () {
-                              Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                  builder: (context) => AlarmEditor(alarm: a),
-                                ),
-                              );
+        alarms.isEmpty
+            ? Positioned.fill(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 16,
+                  children: [
+                    const Icon(M3EIcons.alarm_rounded),
+                    const Text('No alarms yet'),
+                  ],
+                ),
+              )
+            : Align(
+                alignment: AlignmentGeometry.topCenter,
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.all(16),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.start,
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    spacing: 16,
+                    children: alarms
+                        .map(
+                          (a) => Dismissible(
+                            key: Key(a.id),
+                            onDismissed: (direction) {
+                              ref
+                                  .read(alarmsProvider.notifier)
+                                  .deleteAlarm(a.id);
                             },
-                            child: Container(
-                              padding: EdgeInsets.all(16),
-                              child: Row(
-                                spacing: 8,
-                                children: [
-                                  const Icon(M3EIcons.alarm_rounded),
-                                  Text(
-                                    a.time.format(context),
-                                    style: TextStyle(
-                                      color: Theme.of(
-                                        context,
-                                      ).colorScheme.onSurface,
+                            child: Material(
+                              child: Ink(
+                                decoration: BoxDecoration(
+                                  color: Theme.of(
+                                    context,
+                                  ).colorScheme.surfaceContainer,
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                child: InkWell(
+                                  borderRadius: BorderRadius.circular(16),
+                                  onTap: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            AlarmEditor(alarm: a),
+                                      ),
+                                    );
+                                  },
+                                  child: Container(
+                                    padding: EdgeInsets.all(16),
+                                    child: Row(
+                                      spacing: 8,
+                                      children: [
+                                        const Icon(M3EIcons.alarm_rounded),
+                                        Text(
+                                          a.time.format(context),
+                                          style: TextStyle(
+                                            color: Theme.of(
+                                              context,
+                                            ).colorScheme.onSurface,
+                                          ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                ],
+                                ),
                               ),
                             ),
                           ),
-                        ),
-                      ),
-                    ),
-                  )
-                  .toList(),
-            ),
-          ),
-        ),
+                        )
+                        .toList(),
+                  ),
+                ),
+              ),
         Positioned(
           bottom: 16,
           right: 16,

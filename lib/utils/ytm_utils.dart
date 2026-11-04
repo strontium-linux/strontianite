@@ -204,6 +204,8 @@ class YtmUtils {
     return position;
   }
 
+  static void getRecommended() {}
+
   static void dispose() {
     _yt.close();
   }
