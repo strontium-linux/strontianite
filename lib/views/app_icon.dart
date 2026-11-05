@@ -22,9 +22,13 @@ class AppIcon extends StatelessWidget {
       child: M3EIconButton(
         onPressed: () => exec(),
         icon: Icon(icon),
+        shape: M3EIconButtonShapeVariant.square,
         decoration: M3EIconButtonDecoration(
           backgroundColor: WidgetStatePropertyAll<Color>(
             Theme.of(context).colorScheme.surface,
+          ),
+          overlayColor: WidgetStatePropertyAll<Color>(
+            Theme.of(context).colorScheme.primaryContainer,
           ),
         ),
       ),

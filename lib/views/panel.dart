@@ -19,8 +19,9 @@ class Panel extends StatelessWidget {
       child: SingleChildScrollView(
         child: Column(
           spacing: 16,
-          mainAxisAlignment: MainAxisAlignment.start,
+          mainAxisAlignment: MainAxisAlignment.center,
           crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
           children: [
             AppIcon(
               name: 'Clock',

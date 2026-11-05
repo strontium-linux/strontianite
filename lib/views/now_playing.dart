@@ -226,7 +226,7 @@ class _NowPlayingState extends State<NowPlaying> {
                           ),
                           Column(
                             mainAxisAlignment: MainAxisAlignment.center,
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             spacing: 16,
                             children: [
