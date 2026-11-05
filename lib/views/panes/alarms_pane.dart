@@ -5,6 +5,7 @@ import 'package:strontianite/models/alarm.dart';
 import 'package:strontianite/providers/alarms_provider.dart';
 import 'package:strontianite/views/alarm_editor.dart';
 import 'package:uuid/uuid.dart';
+import 'package:collection/collection.dart';
 
 class AlarmsPane extends ConsumerStatefulWidget {
   const AlarmsPane({super.key});
@@ -43,6 +44,11 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     spacing: 16,
                     children: alarms
+                        .sorted(
+                          (a, b) => _timeTillNow(
+                            a.time,
+                          ).compareTo(_timeTillNow(b.time)),
+                        )
                         .map(
                           (a) => Dismissible(
                             key: Key(a.id),
@@ -73,16 +79,21 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
                                   child: Container(
                                     padding: EdgeInsets.all(16),
                                     child: Row(
-                                      spacing: 8,
+                                      spacing: 16,
                                       children: [
                                         const Icon(M3EIcons.alarm_rounded),
-                                        Text(
-                                          a.time.format(context),
-                                          style: TextStyle(
-                                            color: Theme.of(
-                                              context,
-                                            ).colorScheme.onSurface,
-                                          ),
+                                        Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(a.name),
+                                            Text(
+                                              a.time.format(context),
+                                              style: TextStyle(fontSize: 11),
+                                            ),
+                                          ],
                                         ),
                                       ],
                                     ),
@@ -120,5 +131,12 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
         ),
       ],
     );
+  }
+
+  int _timeTillNow(TimeOfDay time) {
+    final now = TimeOfDay.now();
+    final nowMinutes = now.hour * 60 + now.minute;
+    final diff = (time.hour * 60 + time.minute - nowMinutes).abs();
+    return diff > 720 ? 1440 - diff : diff;
   }
 }

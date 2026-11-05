@@ -89,6 +89,7 @@ class AlarmsHandler {
   static Future<void> _ring(String id) async {
     debugPrint('Alarm ringing');
     await _alarmPlayer.setAsset('assets/audio/argon.ogg');
+    await _alarmPlayer.setLoopMode(LoopMode.one);
     _alarmPlayer.play();
     IsolateNameServer.lookupPortByName(_portName)?.send(id);
   }
