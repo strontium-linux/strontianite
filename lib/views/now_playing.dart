@@ -22,13 +22,13 @@ class NowPlaying extends StatefulWidget {
 }
 
 class _NowPlayingState extends State<NowPlaying> {
-  double _sliderValue = 0;
-  bool _isPlaying = false;
   late Timer _updateTimer;
   bool _isSeeking = false;
+  final ValueNotifier<double> _sliderValue = ValueNotifier(0);
+  final ValueNotifier _isPlaying = ValueNotifier(false);
 
   String get _sliderLabel {
-    final duration = YtmUtils.getDurationFromPercentage(_sliderValue);
+    final duration = YtmUtils.getDurationFromPercentage(_sliderValue.value);
     return '${duration.inSeconds}s';
   }
 
@@ -38,14 +38,12 @@ class _NowPlayingState extends State<NowPlaying> {
     _updateTimer = Timer.periodic(Duration(milliseconds: 300), (_) {
       if (!mounted) return;
 
-      setState(() {
-        if (!_isSeeking) {
-          _sliderValue =
-              YtmUtils.getPosition().inMilliseconds /
-              YtmUtils.getDuration().inMilliseconds;
-        }
-        _isPlaying = YtmUtils.isPlaying();
-      });
+      if (!_isSeeking) {
+        _sliderValue.value =
+            YtmUtils.getPosition().inMilliseconds /
+            YtmUtils.getDuration().inMilliseconds;
+      }
+      _isPlaying.value = YtmUtils.isPlaying();
     });
   }
 
@@ -66,31 +64,46 @@ class _NowPlayingState extends State<NowPlaying> {
             spacing: 16,
             children: [
               Stack(
-                alignment: AlignmentGeometry.center,
+                alignment: Alignment.center,
                 children: [
                   ValueListenableBuilder(
                     valueListenable: widget.loadTrigger,
                     builder: (context, value, child) {
-                      return M3EProgressIndicator.circularWavy(
-                        value: value == true ? null : _sliderValue,
-                        size: 56,
+                      return ValueListenableBuilder(
+                        valueListenable: _sliderValue,
+                        builder: (context, sliderValue, child) {
+                          return M3EProgressIndicator.circularWavy(
+                            value: value == true ? null : sliderValue,
+                            size: 56,
+                          );
+                        },
                       );
                     },
                   ),
-                  M3EContainer.circle(
+                  SizedBox(
                     width: 32,
                     height: 32,
-                    color: Theme.of(context).colorScheme.primaryContainer,
-                    child: value.thumbnail != null
-                        ? ClipOval(
-                            child: Image.network(
-                              value.thumbnail!,
-                              fit: BoxFit.cover,
-                              width: 32,
-                              height: 32,
+                    child: Stack(
+                      children: [
+                        M3EContainer.circle(
+                          width: 32,
+                          height: 32,
+                          color: Theme.of(context).colorScheme.primaryContainer,
+                          child: _buildImageCore(value, 32),
+                        ),
+                        Positioned.fill(
+                          child: Material(
+                            type: MaterialType.transparency,
+                            shape: const CircleBorder(),
+                            clipBehavior: Clip.antiAlias,
+                            child: InkWell(
+                              customBorder: const CircleBorder(),
+                              onTap: _showBottomSheet,
                             ),
-                          )
-                        : const Icon(M3EIcons.music_note_rounded),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ],
               ),
@@ -120,42 +133,29 @@ class _NowPlayingState extends State<NowPlaying> {
                   ],
                 ),
               ),
-              Expanded(
-                child: SliderTheme(
-                  data: SliderThemeData(
-                    showValueIndicator: ShowValueIndicator.onDrag,
-                  ),
-                  child: M3ESlider(
-                    value: _sliderValue,
-                    label: _sliderLabel,
-                    onChanged: (value) {
-                      _isSeeking = true;
-                      setState(() {
-                        _sliderValue = value;
-                      });
-                    },
-                    onChangeEnd: (value) async {
-                      await YtmUtils.seekTo(value);
-                      _isSeeking = false;
-                    },
-                  ),
-                ),
+              Expanded(child: _buildSlider()),
+              ValueListenableBuilder(
+                valueListenable: _isPlaying,
+                builder: (context, value, child) {
+                  return value
+                      ? M3EIconButton(
+                          variant: M3EIconButtonVariant.tonal,
+                          icon: const Icon(M3EIcons.pause_rounded),
+                          onPressed: () {
+                            YtmUtils.setPlaying(false);
+                            _isPlaying.value = false;
+                          },
+                        )
+                      : M3EIconButton(
+                          variant: M3EIconButtonVariant.tonal,
+                          icon: const Icon(M3EIcons.play_arrow_rounded),
+                          onPressed: () {
+                            YtmUtils.setPlaying(true);
+                            _isPlaying.value = true;
+                          },
+                        );
+                },
               ),
-              _isPlaying
-                  ? M3EIconButton(
-                      variant: M3EIconButtonVariant.tonal,
-                      icon: const Icon(M3EIcons.pause_rounded),
-                      onPressed: () {
-                        YtmUtils.setPlaying(false);
-                      },
-                    )
-                  : M3EIconButton(
-                      variant: M3EIconButtonVariant.tonal,
-                      icon: const Icon(M3EIcons.play_arrow_rounded),
-                      onPressed: () {
-                        YtmUtils.setPlaying(true);
-                      },
-                    ),
             ],
           ),
         );
@@ -167,5 +167,171 @@ class _NowPlayingState extends State<NowPlaying> {
   void dispose() {
     _updateTimer.cancel();
     super.dispose();
+  }
+
+  void _showBottomSheet() {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      builder: (context) {
+        return StatefulBuilder(
+          builder: (context, innerSetState) => ValueListenableBuilder(
+            valueListenable: widget.playTrigger,
+            builder: (context, value, child) {
+              return Padding(
+                padding: const EdgeInsets.all(16),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.center,
+                  spacing: 16,
+                  children: [
+                    Container(
+                      decoration: BoxDecoration(
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      clipBehavior: Clip.antiAlias,
+                      child: _buildImageCore(value, 200),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisSize: MainAxisSize.min,
+                        spacing: 16,
+                        children: [
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                value.title,
+                                style: TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.primary,
+                                  fontVariations: [FontVariation('ROND', 100)],
+                                  fontSize: 24,
+                                ),
+                                textAlign: TextAlign.left,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                value.artist,
+                                style: TextStyle(fontSize: 12),
+                                textAlign: TextAlign.left,
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
+                          ),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            crossAxisAlignment: CrossAxisAlignment.stretch,
+                            mainAxisSize: MainAxisSize.min,
+                            spacing: 16,
+                            children: [
+                              _buildSlider(),
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                crossAxisAlignment: CrossAxisAlignment.center,
+                                spacing: 16,
+                                children: [
+                                  M3EIconButton(
+                                    variant: M3EIconButtonVariant.tonal,
+                                    icon: const Icon(
+                                      M3EIcons.skip_previous_rounded,
+                                    ),
+                                    onPressed: () async {
+                                      await YtmUtils.previous();
+                                    },
+                                  ),
+                                  ValueListenableBuilder(
+                                    valueListenable: _isPlaying,
+                                    builder: (context, value, child) {
+                                      return value
+                                          ? M3EIconButton(
+                                              variant:
+                                                  M3EIconButtonVariant.filled,
+                                              icon: const Icon(
+                                                M3EIcons.pause_rounded,
+                                              ),
+                                              onPressed: () {
+                                                YtmUtils.setPlaying(false);
+                                                _isPlaying.value = false;
+                                              },
+                                            )
+                                          : M3EIconButton(
+                                              variant:
+                                                  M3EIconButtonVariant.filled,
+                                              icon: const Icon(
+                                                M3EIcons.play_arrow_rounded,
+                                              ),
+                                              onPressed: () {
+                                                YtmUtils.setPlaying(true);
+                                                _isPlaying.value = true;
+                                              },
+                                            );
+                                    },
+                                  ),
+                                  M3EIconButton(
+                                    variant: M3EIconButtonVariant.tonal,
+                                    icon: const Icon(
+                                      M3EIcons.skip_next_rounded,
+                                    ),
+                                    onPressed: () async {
+                                      await YtmUtils.next();
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              );
+            },
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildImageCore(PlayModel value, double size) {
+    return value.thumbnail != null
+        ? ClipRRect(
+            child: Image.network(
+              value.thumbnail!,
+              fit: BoxFit.cover,
+              width: size,
+              height: size,
+            ),
+          )
+        : const Icon(M3EIcons.music_note_rounded);
+  }
+
+  Widget _buildSlider() {
+    return SliderTheme(
+      data: SliderThemeData(showValueIndicator: ShowValueIndicator.onDrag),
+      child: ValueListenableBuilder(
+        valueListenable: _sliderValue,
+        builder: (context, value, child) {
+          return M3ESlider(
+            value: value,
+            label: _sliderLabel,
+            onChanged: (value) {
+              _isSeeking = true;
+              _sliderValue.value = value;
+            },
+            onChangeEnd: (value) async {
+              await YtmUtils.seekTo(value);
+              _isSeeking = false;
+            },
+          );
+        },
+      ),
+    );
   }
 }

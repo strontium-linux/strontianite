@@ -2,9 +2,9 @@ import 'dart:async';
 import 'dart:io';
 import 'dart:math';
 
+import 'package:marquee/marquee.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:permission_handler/permission_handler.dart';
 import 'package:playerctl/playerctl.dart';
 import 'package:strontianite/utils/media_utils.dart';
@@ -29,7 +29,6 @@ class _MediaPaneState extends State<MediaPane> {
   int? _seekPosition;
   DateTime _ignorePositionUntil = DateTime.fromMillisecondsSinceEpoch(0);
   DateTime _ignorePlayStateUntil = DateTime.fromMillisecondsSinceEpoch(0);
-  final Shapes _currentShape = Shapes.pill;
 
   int get _length {
     final l = _mediaInfo?.length ?? 0;
@@ -125,69 +124,87 @@ class _MediaPaneState extends State<MediaPane> {
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16),
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         crossAxisAlignment: CrossAxisAlignment.center,
         spacing: 12,
         children: [
-          _buildImage(),
-          Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16),
-            child: Text(
-              (_noMedia || _mediaInfo?.title == null)
-                  ? 'No media'
-                  : _mediaInfo!.title,
-              style: TextStyle(
-                fontWeight: FontWeight.bold,
-                color: Theme.of(context).colorScheme.primary,
-                fontVariations: [FontVariation('ROND', 100)],
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            spacing: 16,
+            children: [
+              _buildImage(),
+              Expanded(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  spacing: 8,
+                  children: [
+                    SizedBox(
+                      height: 32,
+                      child: Marquee(
+                        text: (_noMedia || _mediaInfo?.title == null)
+                            ? 'No media'
+                            : _mediaInfo!.title,
+                        style: TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Theme.of(context).colorScheme.primary,
+                          fontVariations: [FontVariation('ROND', 100)],
+                          fontSize: 24,
+                        ),
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        scrollAxis: Axis.horizontal,
+                        blankSpace: 48,
+                      ),
+                    ),
+                    Text(
+                      _mediaInfo?.artist ?? 'Unknown Artist',
+                      style: TextStyle(fontSize: 12),
+                      textAlign: TextAlign.left,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    SliderTheme(
+                      data: SliderThemeData(
+                        showValueIndicator: ShowValueIndicator.onDrag,
+                      ),
+                      child: M3ESlider(
+                        value: _sliderValue,
+                        label:
+                            '${(_displayPosition * 0.000001).round().toString()}s',
+                        enabled: !_noMedia && Platform.isLinux,
+                        onChanged: (value) {
+                          setState(() {
+                            _seekPosition = (value * _length).round();
+                          });
+                        },
+                        onChangeEnd: (value) async {
+                          debugPrint(
+                            'Change end, current position: $_anchorPosition',
+                          );
+                          debugPrint('Max position: $_length');
+                          final target = (value * _length).round();
+                          setState(() {
+                            _reanchor(target);
+                            _seekPosition = null;
+                            _ignorePositionUntil = DateTime.now().add(
+                              const Duration(seconds: 3),
+                            );
+                          });
+                          // IMPORTANT: playerctl wrapper passes us to playerctl which takes seconds
+                          await MediaUtils.seekTo(target ~/ 1000000);
+                        },
+                      ),
+                    ),
+                    Text(_elapsed, style: TextStyle(fontSize: 11)),
+                  ],
+                ),
               ),
-              textAlign: TextAlign.center,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
+            ],
           ),
-          Text(
-            _mediaInfo?.artist ?? 'Unknown Artist',
-            style: TextStyle(fontSize: 11),
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-          ),
-          Padding(
-            padding: const EdgeInsets.only(left: 16, right: 16),
-            child: SliderTheme(
-              data: SliderThemeData(
-                showValueIndicator: ShowValueIndicator.onDrag,
-              ),
-              child: M3ESlider(
-                value: _sliderValue,
-                label: '${(_displayPosition * 0.000001).round().toString()}s',
-                enabled: !_noMedia && Platform.isLinux,
-                onChanged: (value) {
-                  setState(() {
-                    _seekPosition = (value * _length).round();
-                  });
-                },
-                onChangeEnd: (value) async {
-                  debugPrint('Change end, current position: $_anchorPosition');
-                  debugPrint('Max position: $_length');
-                  final target = (value * _length).round();
-                  setState(() {
-                    _reanchor(target);
-                    _seekPosition = null;
-                    _ignorePositionUntil = DateTime.now().add(
-                      const Duration(seconds: 3),
-                    );
-                  });
-                  // IMPORTANT: playerctl wrapper passes us to playerctl which takes seconds
-                  await MediaUtils.seekTo(target ~/ 1000000);
-                },
-              ),
-            ),
-          ),
-          Text(_elapsed, style: TextStyle(fontSize: 11)),
           Row(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
@@ -270,13 +287,11 @@ class _MediaPaneState extends State<MediaPane> {
   }
 
   Widget _buildImage() {
-    return GestureDetector(
-      child: M3EContainer(
-        key: ValueKey(_currentShape),
-        _currentShape,
-        child: ClipOval(
-          child: SizedBox.square(dimension: 100, child: _buildImageCore()),
-        ),
+    return Container(
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(16)),
+      clipBehavior: Clip.antiAlias,
+      child: ClipRRect(
+        child: SizedBox.square(dimension: 160, child: _buildImageCore()),
       ),
     );
   }
@@ -322,8 +337,8 @@ class _MediaPaneState extends State<MediaPane> {
 
   Widget _buildDefaultImage() {
     return SizedBox(
-      width: 100,
-      height: 100,
+      width: 160,
+      height: 160,
       child: Container(
         color: Theme.of(context).colorScheme.primaryContainer,
         child: Icon(
