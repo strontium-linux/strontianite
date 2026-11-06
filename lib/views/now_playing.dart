@@ -33,16 +33,15 @@ class _NowPlayingState extends State<NowPlaying> {
   LyricsModel? _lyricsModel;
   final ValueNotifier<int> _currentLyricIndex = ValueNotifier(0);
   final _lyricsScrollController = ItemScrollController();
+  BuildContext? _activeContext;
+  double _viewportHeight = 0;
 
   String get _sliderLabel {
     final duration = YtmUtils.getDurationFromPercentage(_sliderValue.value);
     return '${duration.inSeconds}s';
   }
 
-  List<SyncedLyricsModel>? get _syncedLyrics {
-    if (_lyricsModel == null || _lyricsModel?.isSynced == false) return null;
-    return YtmUtils.parseSyncedLyrics(_lyricsModel!);
-  }
+  List<SyncedLyricsModel>? _syncedLyrics;
 
   @override
   void initState() {
@@ -60,26 +59,26 @@ class _NowPlayingState extends State<NowPlaying> {
 
       _isPlaying.value = YtmUtils.isPlaying();
 
-      if (_syncedLyrics != null) {
-        final lyrics = _syncedLyrics;
-        if (lyrics == null || lyrics.isEmpty) return;
-
+      final lyrics = _syncedLyrics;
+      if (lyrics != null && lyrics.isNotEmpty) {
         final index = lyrics.lastIndexWhere((l) => l.position <= position);
-        _currentLyricIndex.value = index < 0 ? 0 : index;
-        if (_lyricsScrollController.isAttached) {
-          _lyricsScrollController.scrollTo(
-            index: index,
-            duration: const Duration(milliseconds: 500),
-            curve: Curves.ease,
-            alignment: 0.5,
-          );
+        final newIndex = index < 0 ? 0 : index;
+
+        if (newIndex != _currentLyricIndex.value) {
+          _currentLyricIndex.value = newIndex;
+          _scrollToLine(newIndex);
         }
       }
     });
 
     widget.loadTrigger.addListener(() async {
       if (widget.loadTrigger.value == false) {
-        _lyricsModel = await YtmUtils.fetchLyrics();
+        final model = await YtmUtils.fetchLyrics();
+        _lyricsModel = model;
+        _syncedLyrics = (model != null && model.isSynced)
+            ? YtmUtils.parseSyncedLyrics(model)
+            : null;
+        _currentLyricIndex.value = 0;
       }
     });
   }
@@ -245,43 +244,63 @@ class _NowPlayingState extends State<NowPlaying> {
                             child: FadedScrollable(
                               child: SizedBox(
                                 width: double.infinity,
-                                child: ValueListenableBuilder(
-                                  valueListenable: _currentLyricIndex,
-                                  builder: (context, lyricIndex, child) {
-                                    return ScrollablePositionedList.separated(
-                                      separatorBuilder: (context, index) =>
-                                          const SizedBox(height: 16),
-                                      itemScrollController:
-                                          _lyricsScrollController,
-                                      itemCount: _syncedLyrics?.length ?? 1,
-                                      itemBuilder: (context, i) {
-                                        if (_syncedLyrics == null || i < 0) {
-                                          return Text(
-                                            _lyricsModel?.lyrics ??
-                                                'No lyrics data',
-                                          );
-                                        }
+                                child: LayoutBuilder(
+                                  builder: (context, constraints) {
+                                    _viewportHeight = constraints.maxHeight;
+                                    return ValueListenableBuilder(
+                                      valueListenable: _currentLyricIndex,
+                                      builder: (context, lyricIndex, child) {
+                                        return ScrollablePositionedList.separated(
+                                          initialAlignment: 0.5,
+                                          separatorBuilder: (context, index) =>
+                                              const SizedBox(height: 16),
+                                          itemScrollController:
+                                              _lyricsScrollController,
+                                          itemCount: _syncedLyrics?.length ?? 1,
+                                          itemBuilder: (context, i) {
+                                            if (_syncedLyrics == null ||
+                                                i < 0) {
+                                              return Text(
+                                                _lyricsModel?.lyrics ??
+                                                    'No lyrics data',
+                                              );
+                                            }
 
-                                        final line = _syncedLyrics![i];
-                                        final isCurrentLine = i == lyricIndex;
-                                        return Text(
-                                          line.line,
-                                          style: TextStyle(
-                                            fontSize: isCurrentLine ? 32 : 24,
-                                            fontWeight: isCurrentLine
-                                                ? FontWeight.bold
-                                                : FontWeight.normal,
-                                            fontVariations: [
-                                              FontVariation('ROND', 100),
-                                            ],
-                                            color: isCurrentLine
-                                                ? Theme.of(
-                                                    context,
-                                                  ).colorScheme.primary
-                                                : Theme.of(
-                                                    context,
-                                                  ).colorScheme.onSurface,
-                                          ),
+                                            final line = _syncedLyrics![i];
+                                            final isCurrentLine =
+                                                i == lyricIndex;
+                                            return Builder(
+                                              builder: (context) {
+                                                if (isCurrentLine) {
+                                                  _activeContext = context;
+                                                }
+                                                return Text(
+                                                  line.line,
+                                                  style: TextStyle(
+                                                    fontSize: isCurrentLine
+                                                        ? 32
+                                                        : 24,
+                                                    fontWeight: isCurrentLine
+                                                        ? FontWeight.bold
+                                                        : FontWeight.normal,
+                                                    fontVariations: [
+                                                      FontVariation(
+                                                        'ROND',
+                                                        100,
+                                                      ),
+                                                    ],
+                                                    color: isCurrentLine
+                                                        ? Theme.of(
+                                                            context,
+                                                          ).colorScheme.primary
+                                                        : Theme.of(context)
+                                                              .colorScheme
+                                                              .onSurface,
+                                                  ),
+                                                );
+                                              },
+                                            );
+                                          },
                                         );
                                       },
                                     );
@@ -441,5 +460,29 @@ class _NowPlayingState extends State<NowPlaying> {
         },
       ),
     );
+  }
+
+  void _scrollToLine(int index) {
+    if (index < 0 || !_lyricsScrollController.isAttached) return;
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted || !_lyricsScrollController.isAttached) return;
+
+      final context = _activeContext;
+      final box = (context != null && context.mounted)
+          ? context.findRenderObject() as RenderBox?
+          : null;
+      final itemHeight = box?.size.height ?? 0;
+      final alignment = _viewportHeight > 0
+          ? (0.5 - itemHeight / (2 * _viewportHeight)).clamp(0.0, 1.0)
+          : 0.5;
+
+      _lyricsScrollController.scrollTo(
+        index: index,
+        duration: const Duration(milliseconds: 500),
+        curve: Curves.ease,
+        alignment: alignment,
+      );
+    });
   }
 }
