@@ -1,10 +1,14 @@
 import 'dart:async';
 
+import 'package:faded_scrollable/faded_scrollable.dart';
 import 'package:flutter_m3shapes_extended/flutter_m3shapes_extended.dart';
 import 'package:marquee/marquee.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
+import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
+import 'package:strontianite/models/lyrics_model.dart';
 import 'package:strontianite/models/play_model.dart';
+import 'package:strontianite/models/synced_lyrics_model.dart';
 import 'package:strontianite/utils/ytm_utils.dart';
 
 class NowPlaying extends StatefulWidget {
@@ -26,24 +30,57 @@ class _NowPlayingState extends State<NowPlaying> {
   bool _isSeeking = false;
   final ValueNotifier<double> _sliderValue = ValueNotifier(0);
   final ValueNotifier _isPlaying = ValueNotifier(false);
+  LyricsModel? _lyricsModel;
+  final ValueNotifier<int> _currentLyricIndex = ValueNotifier(0);
+  final _lyricsScrollController = ItemScrollController();
 
   String get _sliderLabel {
     final duration = YtmUtils.getDurationFromPercentage(_sliderValue.value);
     return '${duration.inSeconds}s';
   }
 
+  List<SyncedLyricsModel>? get _syncedLyrics {
+    if (_lyricsModel == null || _lyricsModel?.isSynced == false) return null;
+    return YtmUtils.parseSyncedLyrics(_lyricsModel!);
+  }
+
   @override
   void initState() {
     super.initState();
+
     _updateTimer = Timer.periodic(Duration(milliseconds: 300), (_) {
       if (!mounted) return;
 
+      final position = YtmUtils.getPosition();
+      final duration = YtmUtils.getDuration();
+
       if (!_isSeeking) {
-        _sliderValue.value =
-            YtmUtils.getPosition().inMilliseconds /
-            YtmUtils.getDuration().inMilliseconds;
+        _sliderValue.value = position.inMilliseconds / duration.inMilliseconds;
       }
+
       _isPlaying.value = YtmUtils.isPlaying();
+
+      if (_syncedLyrics != null) {
+        final lyrics = _syncedLyrics;
+        if (lyrics == null || lyrics.isEmpty) return;
+
+        final index = lyrics.lastIndexWhere((l) => l.position <= position);
+        _currentLyricIndex.value = index < 0 ? 0 : index;
+        if (_lyricsScrollController.isAttached) {
+          _lyricsScrollController.scrollTo(
+            index: index,
+            duration: const Duration(milliseconds: 500),
+            curve: Curves.ease,
+            alignment: 0.5,
+          );
+        }
+      }
+    });
+
+    widget.loadTrigger.addListener(() async {
+      if (widget.loadTrigger.value == false) {
+        _lyricsModel = await YtmUtils.fetchLyrics();
+      }
     });
   }
 
@@ -180,26 +217,89 @@ class _NowPlayingState extends State<NowPlaying> {
             builder: (context, value, child) {
               return Padding(
                 padding: const EdgeInsets.all(16),
-                child: Row(
+                child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   crossAxisAlignment: CrossAxisAlignment.center,
+                  mainAxisSize: MainAxisSize.min,
                   spacing: 16,
                   children: [
-                    Container(
-                      decoration: BoxDecoration(
-                        borderRadius: BorderRadius.circular(16),
-                      ),
-                      clipBehavior: Clip.antiAlias,
-                      child: _buildImageCore(value, 200),
-                    ),
                     Expanded(
-                      child: Column(
+                      child: Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
                         spacing: 16,
                         children: [
-                          Column(
+                          if (value.thumbnail != null)
+                            Expanded(
+                              flex: 4,
+                              child: Container(
+                                decoration: BoxDecoration(
+                                  borderRadius: BorderRadius.circular(16),
+                                ),
+                                clipBehavior: Clip.antiAlias,
+                                child: _buildImageCore(value, 300),
+                              ),
+                            ),
+                          Expanded(
+                            flex: 6,
+                            child: FadedScrollable(
+                              child: SizedBox(
+                                width: double.infinity,
+                                child: ValueListenableBuilder(
+                                  valueListenable: _currentLyricIndex,
+                                  builder: (context, lyricIndex, child) {
+                                    return ScrollablePositionedList.separated(
+                                      separatorBuilder: (context, index) =>
+                                          const SizedBox(height: 16),
+                                      itemScrollController:
+                                          _lyricsScrollController,
+                                      itemCount: _syncedLyrics?.length ?? 1,
+                                      itemBuilder: (context, i) {
+                                        if (_syncedLyrics == null || i < 0) {
+                                          return Text(
+                                            _lyricsModel?.lyrics ??
+                                                'No lyrics data',
+                                          );
+                                        }
+
+                                        final line = _syncedLyrics![i];
+                                        final isCurrentLine = i == lyricIndex;
+                                        return Text(
+                                          line.line,
+                                          style: TextStyle(
+                                            fontSize: isCurrentLine ? 32 : 24,
+                                            fontWeight: isCurrentLine
+                                                ? FontWeight.bold
+                                                : FontWeight.normal,
+                                            fontVariations: [
+                                              FontVariation('ROND', 100),
+                                            ],
+                                            color: isCurrentLine
+                                                ? Theme.of(
+                                                    context,
+                                                  ).colorScheme.primary
+                                                : Theme.of(
+                                                    context,
+                                                  ).colorScheme.onSurface,
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  },
+                                ),
+                              ),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 4,
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
@@ -224,70 +324,78 @@ class _NowPlayingState extends State<NowPlaying> {
                               ),
                             ],
                           ),
-                          Column(
+                        ),
+                        Expanded(
+                          flex: 6,
+                          child: Column(
                             mainAxisAlignment: MainAxisAlignment.center,
                             crossAxisAlignment: CrossAxisAlignment.start,
                             mainAxisSize: MainAxisSize.min,
                             spacing: 16,
                             children: [
-                              _buildSlider(),
                               Row(
                                 mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.center,
-                                spacing: 16,
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                mainAxisSize: MainAxisSize.min,
+                                spacing: 8,
                                 children: [
-                                  M3EIconButton(
-                                    variant: M3EIconButtonVariant.tonal,
-                                    icon: const Icon(
-                                      M3EIcons.skip_previous_rounded,
-                                    ),
-                                    onPressed: () async {
-                                      await YtmUtils.previous();
-                                    },
+                                  Row(
+                                    children: [
+                                      M3EIconButton(
+                                        variant: M3EIconButtonVariant.tonal,
+                                        icon: const Icon(
+                                          M3EIcons.skip_previous_rounded,
+                                        ),
+                                        onPressed: () async {
+                                          await YtmUtils.previous();
+                                        },
+                                      ),
+                                      ValueListenableBuilder(
+                                        valueListenable: _isPlaying,
+                                        builder: (context, value, child) {
+                                          return value
+                                              ? M3EIconButton(
+                                                  variant: M3EIconButtonVariant
+                                                      .filled,
+                                                  icon: const Icon(
+                                                    M3EIcons.pause_rounded,
+                                                  ),
+                                                  onPressed: () {
+                                                    YtmUtils.setPlaying(false);
+                                                    _isPlaying.value = false;
+                                                  },
+                                                )
+                                              : M3EIconButton(
+                                                  variant: M3EIconButtonVariant
+                                                      .filled,
+                                                  icon: const Icon(
+                                                    M3EIcons.play_arrow_rounded,
+                                                  ),
+                                                  onPressed: () {
+                                                    YtmUtils.setPlaying(true);
+                                                    _isPlaying.value = true;
+                                                  },
+                                                );
+                                        },
+                                      ),
+                                      M3EIconButton(
+                                        variant: M3EIconButtonVariant.tonal,
+                                        icon: const Icon(
+                                          M3EIcons.skip_next_rounded,
+                                        ),
+                                        onPressed: () async {
+                                          await YtmUtils.next();
+                                        },
+                                      ),
+                                    ],
                                   ),
-                                  ValueListenableBuilder(
-                                    valueListenable: _isPlaying,
-                                    builder: (context, value, child) {
-                                      return value
-                                          ? M3EIconButton(
-                                              variant:
-                                                  M3EIconButtonVariant.filled,
-                                              icon: const Icon(
-                                                M3EIcons.pause_rounded,
-                                              ),
-                                              onPressed: () {
-                                                YtmUtils.setPlaying(false);
-                                                _isPlaying.value = false;
-                                              },
-                                            )
-                                          : M3EIconButton(
-                                              variant:
-                                                  M3EIconButtonVariant.filled,
-                                              icon: const Icon(
-                                                M3EIcons.play_arrow_rounded,
-                                              ),
-                                              onPressed: () {
-                                                YtmUtils.setPlaying(true);
-                                                _isPlaying.value = true;
-                                              },
-                                            );
-                                    },
-                                  ),
-                                  M3EIconButton(
-                                    variant: M3EIconButtonVariant.tonal,
-                                    icon: const Icon(
-                                      M3EIcons.skip_next_rounded,
-                                    ),
-                                    onPressed: () async {
-                                      await YtmUtils.next();
-                                    },
-                                  ),
+                                  Expanded(child: _buildSlider()),
                                 ],
                               ),
                             ],
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),

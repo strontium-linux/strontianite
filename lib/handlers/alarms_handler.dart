@@ -9,7 +9,7 @@ import 'package:cron/cron.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:strontianite/main.dart';
-import 'package:strontianite/models/alarm.dart';
+import 'package:strontianite/models/alarm_model.dart';
 import 'package:strontianite/providers/alarms_provider.dart';
 
 class AlarmsHandler {
@@ -29,7 +29,7 @@ class AlarmsHandler {
     _alarmPort.listen((message) => _controller.add(message));
   }
 
-  static Future<void> registerAlarm(Alarm alarm) async {
+  static Future<void> registerAlarm(AlarmModel alarm) async {
     if (_androidAlarms.containsKey(alarm.id) ||
         _linuxAlarms.containsKey(alarm.id)) {
       await unregisterAlarm(alarm.id);
@@ -46,7 +46,7 @@ class AlarmsHandler {
     }
   }
 
-  static Future<int> _androidScheduleNextDaily(Alarm alarm) async {
+  static Future<int> _androidScheduleNextDaily(AlarmModel alarm) async {
     final now = DateTime.now();
     var target = DateTime(
       now.year,

@@ -14,6 +14,7 @@ dependencies:
   collection: ^1.19.1
   cron: ^0.6.2
   darttubefix: ^1.0.8
+  faded_scrollable: ^1.0.1
   flutter:
     sdk: flutter
   flutter_m3shapes_extended: ^1.2.1
@@ -34,6 +35,7 @@ dependencies:
   permission_handler: ^13.0.2
   playerctl: ^1.2.1
   scaled_app: ^2.3.2
+  scrollable_positioned_list: ^0.3.8
   shared_preferences: ^2.5.6
   skeletonizer: ^3.0.0
   uuid: ^4.6.0

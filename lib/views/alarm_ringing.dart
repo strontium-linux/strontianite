@@ -1,12 +1,12 @@
 import 'package:material_3_expressive/material_3_expressive.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:strontianite/handlers/alarms_handler.dart';
-import 'package:strontianite/models/alarm.dart';
+import 'package:strontianite/models/alarm_model.dart';
 
 class AlarmRinging extends StatelessWidget {
   const AlarmRinging({super.key, required this._alarm});
 
-  final Alarm _alarm;
+  final AlarmModel _alarm;
 
   @override
   Widget build(BuildContext context) {

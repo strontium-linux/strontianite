@@ -2,19 +2,19 @@ import 'dart:convert';
 
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:strontianite/main.dart';
-import 'package:strontianite/models/settings_state.dart';
+import 'package:strontianite/models/settings_state_model.dart';
 
-class _SettingsNotifier extends Notifier<SettingsState> {
+class _SettingsNotifier extends Notifier<SettingsStateModel> {
   @override
-  SettingsState build() {
+  SettingsStateModel build() {
     final prefs = ref.read(sharedPreferencesProvider);
     final stored = prefs.getString('global_settings');
     if (stored != null) {
       final settings = jsonDecode(stored);
-      return SettingsState.fromJson(settings);
+      return SettingsStateModel.fromJson(settings);
     }
 
-    return const SettingsState(
+    return const SettingsStateModel(
       displayBatteryIndicator: true,
       isHorizontal: false,
       youtubeCookie: '',
@@ -40,6 +40,7 @@ class _SettingsNotifier extends Notifier<SettingsState> {
   }
 }
 
-final settingsProvider = NotifierProvider<_SettingsNotifier, SettingsState>(
-  _SettingsNotifier.new,
-);
+final settingsProvider =
+    NotifierProvider<_SettingsNotifier, SettingsStateModel>(
+      _SettingsNotifier.new,
+    );

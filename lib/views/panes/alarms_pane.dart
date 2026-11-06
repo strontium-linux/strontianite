@@ -1,7 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:material_ui/material_ui.dart';
 import 'package:material_3_expressive/material_3_expressive.dart';
-import 'package:strontianite/models/alarm.dart';
+import 'package:strontianite/models/alarm_model.dart';
 import 'package:strontianite/providers/alarms_provider.dart';
 import 'package:strontianite/views/alarm_editor.dart';
 import 'package:uuid/uuid.dart';
@@ -19,7 +19,7 @@ const _uuid = Uuid();
 class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
   @override
   Widget build(BuildContext context) {
-    final List<Alarm> alarms = ref.watch(alarmsProvider);
+    final List<AlarmModel> alarms = ref.watch(alarmsProvider);
 
     return Stack(
       children: [
@@ -116,7 +116,7 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
                 context,
                 MaterialPageRoute(
                   builder: (context) => AlarmEditor(
-                    alarm: Alarm(
+                    alarm: AlarmModel(
                       id: _uuid.v4(),
                       time: TimeOfDay.now(),
                       name: 'New Alarm',

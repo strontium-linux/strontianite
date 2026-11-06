@@ -1,5 +1,5 @@
-class SettingsState {
-  const SettingsState({
+class SettingsStateModel {
+  const SettingsStateModel({
     required this.displayBatteryIndicator,
     required this.isHorizontal,
     required this.youtubeCookie,
@@ -17,20 +17,20 @@ class SettingsState {
     };
   }
 
-  factory SettingsState.fromJson(Map<String, dynamic> json) {
-    return SettingsState(
+  factory SettingsStateModel.fromJson(Map<String, dynamic> json) {
+    return SettingsStateModel(
       displayBatteryIndicator: json['displayBatteryIndicator'] ?? true,
       isHorizontal: json['isHorizontal'] ?? false,
       youtubeCookie: json['youtubeCookie'] ?? '',
     );
   }
 
-  SettingsState copyWith({
+  SettingsStateModel copyWith({
     bool? displayBatteryIndicator,
     bool? isHorizontal,
     String? youtubeCookie,
   }) {
-    return SettingsState(
+    return SettingsStateModel(
       displayBatteryIndicator:
           displayBatteryIndicator ?? this.displayBatteryIndicator,
       isHorizontal: isHorizontal ?? this.isHorizontal,

@@ -5,9 +5,12 @@ import 'package:darttubefix/darttubefix.dart';
 import 'package:flutter/foundation.dart';
 import 'package:just_audio/just_audio.dart';
 import 'package:strontianite/main.dart';
+import 'package:strontianite/models/lyrics_model.dart';
 import 'package:strontianite/models/play_model.dart';
+import 'package:strontianite/models/synced_lyrics_model.dart';
 import 'package:strontianite/providers/settings_provider.dart';
 import 'package:strontianite/utils/authenticated_http_client.dart';
+import 'package:strontianite/utils/lyrics_http_client.dart';
 import 'package:youtube_explode_dart/youtube_explode_dart.dart';
 import 'package:youtube_music_explode_dart/youtube_music_explode_dart.dart';
 
@@ -20,6 +23,7 @@ class YtmUtils {
   static List<String> _lastSuggestions = List.empty();
   static String _title = 'Not playing';
   static String _artist = 'Unknown artist';
+  static String _id = "";
   static String? _thumbnail;
   static String? _related;
   static bool _listening = false;
@@ -27,6 +31,7 @@ class YtmUtils {
   static late Function(bool isLoading) _onLoaded;
   static final List<String> _history = [];
   static int _index = -1;
+  static final _lyricsClient = LyricsHttpClient();
 
   static Future<List<String>> getSuggestions(String query) async {
     debugPrint('Searching: $query');
@@ -70,6 +75,7 @@ class YtmUtils {
       final streams = await yt.streams;
       final length = await yt.length;
 
+      _id = id;
       _title = title;
       _artist = artist;
       _thumbnail = artUri;
@@ -252,6 +258,43 @@ class YtmUtils {
       return;
     }
     await playRelated(_callback!);
+  }
+
+  static Future<LyricsModel?> fetchLyrics() async {
+    final uri = Uri.parse('https://api-lyrics.simpmusic.org/v1/$_id');
+    final response = await _lyricsClient.get(uri);
+    final json = jsonDecode(response.body);
+    if (json['success'] == true) {
+      final list = json['data'] as List;
+      if (list.isEmpty) return null;
+
+      final data = list.first as Map<String, dynamic>;
+      final plainLyric = data['plainLyric'];
+      final syncedLyrics = data['syncedLyrics'];
+      if (syncedLyrics != null) {
+        return LyricsModel(lyrics: syncedLyrics, isSynced: true);
+      } else {
+        return LyricsModel(lyrics: plainLyric, isSynced: false);
+      }
+    }
+    return null;
+  }
+
+  static List<SyncedLyricsModel> parseSyncedLyrics(LyricsModel lyrics) {
+    final lineRegex = RegExp(r'^\[(\d{1,2}:\d{2}(?:\.\d{1,3})?)\]\s*(.*)$');
+
+    return lyrics.lyrics
+        .split(RegExp(r'\r?\n|\\n'))
+        .map((l) => l.trim())
+        .map((l) => lineRegex.firstMatch(l))
+        .whereType<RegExpMatch>()
+        .map(
+          (m) => SyncedLyricsModel(
+            timestamp: m.group(1)!,
+            line: m.group(2)!.trim(),
+          ),
+        )
+        .toList();
   }
 
   static void dispose() {
