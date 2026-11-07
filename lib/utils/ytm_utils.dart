@@ -261,6 +261,7 @@ class YtmUtils {
   }
 
   static Future<LyricsModel?> fetchLyrics() async {
+    debugPrint('Fetching lyrics for: $_id');
     final uri = Uri.parse('https://api-lyrics.simpmusic.org/v1/$_id');
     final response = await _lyricsClient.get(uri);
     final json = jsonDecode(response.body);

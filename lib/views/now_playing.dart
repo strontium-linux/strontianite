@@ -30,7 +30,7 @@ class _NowPlayingState extends State<NowPlaying> {
   bool _isSeeking = false;
   final ValueNotifier<double> _sliderValue = ValueNotifier(0);
   final ValueNotifier _isPlaying = ValueNotifier(false);
-  LyricsModel? _lyricsModel;
+  final ValueNotifier<LyricsModel?> _lyricsModel = ValueNotifier(null);
   final ValueNotifier<int> _currentLyricIndex = ValueNotifier(0);
   final _lyricsScrollController = ItemScrollController();
   BuildContext? _activeContext;
@@ -74,7 +74,7 @@ class _NowPlayingState extends State<NowPlaying> {
     widget.loadTrigger.addListener(() async {
       if (widget.loadTrigger.value == false) {
         final model = await YtmUtils.fetchLyrics();
-        _lyricsModel = model;
+        _lyricsModel.value = model;
         _syncedLyrics = (model != null && model.isSynced)
             ? YtmUtils.parseSyncedLyrics(model)
             : null;
@@ -241,72 +241,95 @@ class _NowPlayingState extends State<NowPlaying> {
                             ),
                           Expanded(
                             flex: 6,
-                            child: FadedScrollable(
-                              child: SizedBox(
-                                width: double.infinity,
-                                child: LayoutBuilder(
-                                  builder: (context, constraints) {
-                                    _viewportHeight = constraints.maxHeight;
-                                    return ValueListenableBuilder(
-                                      valueListenable: _currentLyricIndex,
-                                      builder: (context, lyricIndex, child) {
-                                        return ScrollablePositionedList.separated(
-                                          initialAlignment: 0.5,
-                                          separatorBuilder: (context, index) =>
-                                              const SizedBox(height: 16),
-                                          itemScrollController:
-                                              _lyricsScrollController,
-                                          itemCount: _syncedLyrics?.length ?? 1,
-                                          itemBuilder: (context, i) {
-                                            if (_syncedLyrics == null ||
-                                                i < 0) {
-                                              return Text(
-                                                _lyricsModel?.lyrics ??
-                                                    'No lyrics data',
-                                              );
-                                            }
+                            child: ValueListenableBuilder(
+                              valueListenable: _lyricsModel,
+                              builder: (context, lyrics, child) {
+                                return FadedScrollable(
+                                  child: SizedBox(
+                                    width: double.infinity,
+                                    child: (_syncedLyrics == null)
+                                        ? Text(
+                                            lyrics?.lyrics ?? 'No lyrics data',
+                                          )
+                                        : LayoutBuilder(
+                                            builder: (context, constraints) {
+                                              _viewportHeight =
+                                                  constraints.maxHeight;
+                                              return ValueListenableBuilder(
+                                                valueListenable:
+                                                    _currentLyricIndex,
+                                                builder: (context, lyricIndex, child) {
+                                                  return ScrollablePositionedList.separated(
+                                                    initialAlignment: 0.5,
+                                                    separatorBuilder:
+                                                        (context, index) =>
+                                                            const SizedBox(
+                                                              height: 16,
+                                                            ),
+                                                    itemScrollController:
+                                                        _lyricsScrollController,
+                                                    itemCount:
+                                                        _syncedLyrics?.length ??
+                                                        1,
+                                                    itemBuilder: (context, i) {
+                                                      if (i < 0) {
+                                                        return Text('');
+                                                      }
 
-                                            final line = _syncedLyrics![i];
-                                            final isCurrentLine =
-                                                i == lyricIndex;
-                                            return Builder(
-                                              builder: (context) {
-                                                if (isCurrentLine) {
-                                                  _activeContext = context;
-                                                }
-                                                return Text(
-                                                  line.line,
-                                                  style: TextStyle(
-                                                    fontSize: isCurrentLine
-                                                        ? 32
-                                                        : 24,
-                                                    fontWeight: isCurrentLine
-                                                        ? FontWeight.bold
-                                                        : FontWeight.normal,
-                                                    fontVariations: [
-                                                      FontVariation(
-                                                        'ROND',
-                                                        100,
-                                                      ),
-                                                    ],
-                                                    color: isCurrentLine
-                                                        ? Theme.of(
-                                                            context,
-                                                          ).colorScheme.primary
-                                                        : Theme.of(context)
-                                                              .colorScheme
-                                                              .onSurface,
-                                                  ),
-                                                );
-                                              },
-                                            );
-                                          },
-                                        );
-                                      },
-                                    );
-                                  },
-                                ),
-                              ),
+                                                      final line =
+                                                          _syncedLyrics![i];
+                                                      final isCurrentLine =
+                                                          i == lyricIndex;
+                                                      return Builder(
+                                                        builder: (context) {
+                                                          if (isCurrentLine) {
+                                                            _activeContext =
+                                                                context;
+                                                          }
+                                                          return Text(
+                                                            line.line,
+                                                            style: TextStyle(
+                                                              fontSize:
+                                                                  isCurrentLine
+                                                                  ? 32
+                                                                  : 24,
+                                                              fontWeight:
+                                                                  isCurrentLine
+                                                                  ? FontWeight
+                                                                        .bold
+                                                                  : FontWeight
+                                                                        .normal,
+                                                              fontVariations: [
+                                                                FontVariation(
+                                                                  'ROND',
+                                                                  100,
+                                                                ),
+                                                              ],
+                                                              color:
+                                                                  isCurrentLine
+                                                                  ? Theme.of(
+                                                                          context,
+                                                                        )
+                                                                        .colorScheme
+                                                                        .primary
+                                                                  : Theme.of(
+                                                                          context,
+                                                                        )
+                                                                        .colorScheme
+                                                                        .onSurface,
+                                                            ),
+                                                          );
+                                                        },
+                                                      );
+                                                    },
+                                                  );
+                                                },
+                                              );
+                                            },
+                                          ),
+                                  ),
+                                );
+                              },
                             ),
                           ),
                         ],
