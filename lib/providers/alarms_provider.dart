@@ -26,7 +26,7 @@ class _AlarmsNotifier extends Notifier<List<AlarmModel>> {
 
     final found = state.indexWhere((a) => a.id == alarm.id);
     if (found != -1) {
-      state[found] = alarm;
+      state = [...state.sublist(0, found), alarm, ...state.sublist(found + 1)];
     } else {
       state = [...state, alarm];
     }

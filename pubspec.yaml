@@ -1,7 +1,7 @@
 name: strontianite
 description: "A new Flutter project."
 publish_to: 'none'
-version: 0.2.0+1
+version: 0.3.0+1
 
 environment:
   sdk: ^3.12.2
@@ -20,8 +20,9 @@ dependencies:
   flutter_m3shapes_extended: ^1.2.1
   flutter_media_controller: ^1.0.3
   flutter_riverpod: ^3.4.3
-  freedesktop_desktop_entry: ^0.6.1
   http: ^1.6.0
+  installed_apps: ^2.2.1
+  installed_apps_plugin: ^0.0.3
   intl: ^0.20.3
   just_audio: ^0.10.6
   just_audio_media_kit: ^2.1.0
@@ -38,6 +39,7 @@ dependencies:
   scrollable_positioned_list: ^0.3.8
   shared_preferences: ^2.5.6
   skeletonizer: ^3.0.0
+  universal_image: ^1.0.12
   uuid: ^4.6.0
   youtube_explode_dart: ^3.1.0
   youtube_music_explode_dart:

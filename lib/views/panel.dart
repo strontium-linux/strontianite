@@ -58,6 +58,13 @@ class Panel extends StatelessWidget {
                 switchPane(3);
               },
             ),
+            AppIcon(
+              name: 'Launchpad',
+              icon: M3EIcons.apps_rounded,
+              exec: () {
+                switchPane(4);
+              },
+            ),
           ],
         ),
       ),

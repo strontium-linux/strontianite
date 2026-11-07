@@ -4,6 +4,7 @@
 
 list(APPEND FLUTTER_PLUGIN_LIST
   dynamic_color
+  installed_apps_plugin
   media_kit_libs_linux
 )
 

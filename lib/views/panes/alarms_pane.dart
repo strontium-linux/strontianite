@@ -81,7 +81,13 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
                                     child: Row(
                                       spacing: 16,
                                       children: [
-                                        const Icon(M3EIcons.alarm_rounded),
+                                        a.repeat
+                                            ? const Icon(
+                                                M3EIcons.repeat_rounded,
+                                              )
+                                            : const Icon(
+                                                M3EIcons.alarm_rounded,
+                                              ),
                                         Column(
                                           mainAxisAlignment:
                                               MainAxisAlignment.center,
@@ -120,6 +126,7 @@ class _AlarmsPaneState extends ConsumerState<AlarmsPane> {
                       id: _uuid.v4(),
                       time: TimeOfDay.now(),
                       name: 'New Alarm',
+                      repeat: true,
                     ),
                     newAlarm: true,
                   ),

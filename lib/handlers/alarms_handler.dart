@@ -41,7 +41,7 @@ class AlarmsHandler {
     } else {
       _linuxAlarms[alarm.id] = _cron.schedule(
         Schedule.parse('${alarm.time.minute} ${alarm.time.hour} * * *'),
-        () => _ring(alarm.id),
+        () => _linuxRing(alarm),
       );
     }
   }
@@ -75,14 +75,22 @@ class AlarmsHandler {
     return intId;
   }
 
+  static Future<void> _linuxRing(AlarmModel alarm) async {
+    await _ring(alarm.id);
+    if (!alarm.repeat) {
+      await _linuxAlarms[alarm.id]?.cancel();
+    }
+  }
+
   @pragma('vm:entry-point')
   static Future<void> _androidRing(int id, Map<String, dynamic> params) async {
     final alarm = container
         .read(alarmsProvider.notifier)
         .getAlarm(params['id']);
-
-    await _androidScheduleNextDaily(alarm);
     await _ring(params['id']);
+    if (alarm.repeat) {
+      await _androidScheduleNextDaily(alarm);
+    }
   }
 
   @pragma('vm:entry-point')

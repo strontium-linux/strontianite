@@ -16,6 +16,19 @@ class AlarmEditor extends ConsumerStatefulWidget {
 
 class _AlarmEditorState extends ConsumerState<AlarmEditor> {
   late TimeOfDay _time = widget.alarm.time;
+  late String _name = widget.alarm.name;
+  final TextEditingController _nameController = TextEditingController();
+  late bool _repeat = widget.alarm.repeat;
+
+  String get _formattedTime {
+    return _time.format(context);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController.text = _name;
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,31 +37,53 @@ class _AlarmEditorState extends ConsumerState<AlarmEditor> {
         title: Text(widget.newAlarm ? 'Create alarm' : 'Edit alarm'),
         backgroundColor: Theme.of(context).colorScheme.inversePrimary,
       ),
-      body: Padding(
+      body: SingleChildScrollView(
         padding: const EdgeInsets.all(16),
         child: Column(
           spacing: 8,
           mainAxisAlignment: MainAxisAlignment.start,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('Time', style: TextStyle(fontWeight: FontWeight.bold)),
-            Row(
-              spacing: 16,
-              children: [
-                Text(_time.format(context)),
-                M3EIconButton(
-                  onPressed: () => _selectTime(),
-                  icon: const Icon(M3EIcons.schedule_rounded),
-                  tooltip: 'Change time',
+            Material(
+              child: InkWell(
+                onTap: () {
+                  _selectTime();
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Padding(
+                  padding: const EdgeInsets.all(8),
+                  child: Text(_formattedTime, style: TextStyle(fontSize: 24)),
                 ),
-              ],
+              ),
+            ),
+            M3ETextField(
+              controller: _nameController,
+              label: 'Name',
+              onChanged: (value) {
+                setState(() {
+                  _name = value;
+                });
+              },
+            ),
+            SwitchListTile(
+              title: const Text('Repeat'),
+              value: _repeat,
+              onChanged: (value) {
+                setState(() {
+                  _repeat = value;
+                });
+              },
             ),
           ],
         ),
       ),
       floatingActionButton: FloatingActionButton(
         onPressed: () {
-          final updated = widget.alarm.copyWith(time: _time);
+          final updated = widget.alarm.copyWith(
+            time: _time,
+            name: _name,
+            repeat: _repeat,
+          );
           ref.read(alarmsProvider.notifier).updateAlarm(updated);
           Navigator.of(context).pop();
         },
