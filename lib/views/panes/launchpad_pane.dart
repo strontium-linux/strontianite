@@ -93,20 +93,24 @@ class _LaunchpadPaneState extends State<LaunchpadPane> {
             },
           ),
           Expanded(
-            child: SingleChildScrollView(
-              child: Wrap(
-                spacing: 8,
-                runSpacing: 8,
-                children: _filteredApps.map((app) {
-                  return _buildAppIcon(
-                    app.name,
-                    app.icon != null
-                        ? UniversalImage(app.icon!)
-                        : const Icon(M3EIcons.apps_outlined),
-                    app.launch,
-                  );
-                }).toList(),
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
+                maxCrossAxisExtent: 128,
+                mainAxisExtent: 128,
+                mainAxisSpacing: 8,
+                crossAxisSpacing: 8,
               ),
+              itemCount: _filteredApps.length,
+              itemBuilder: (context, index) {
+                final app = _filteredApps[index];
+                return _buildAppIcon(
+                  app.name,
+                  app.icon != null
+                      ? UniversalImage(app.icon!)
+                      : const Icon(M3EIcons.apps_outlined),
+                  app.launch,
+                );
+              },
             ),
           ),
         ],
