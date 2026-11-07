@@ -103,13 +103,25 @@ class _LaunchpadPaneState extends State<LaunchpadPane> {
               itemCount: _filteredApps.length,
               itemBuilder: (context, index) {
                 final app = _filteredApps[index];
-                return _buildAppIcon(
-                  app.name,
-                  app.icon != null
-                      ? UniversalImage(app.icon!)
-                      : const Icon(M3EIcons.apps_outlined),
-                  app.launch,
-                );
+                if (app.linuxIcon != null) {
+                  return _buildAppIcon(
+                    app.name,
+                    UniversalImage(app.linuxIcon!),
+                    app.launch,
+                  );
+                } else if (app.androidIcon != null) {
+                  return _buildAppIcon(
+                    app.name,
+                    Image.memory(app.androidIcon!),
+                    app.launch,
+                  );
+                } else {
+                  return _buildAppIcon(
+                    app.name,
+                    const Icon(M3EIcons.apps_rounded),
+                    app.launch,
+                  );
+                }
               },
             ),
           ),
