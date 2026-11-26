@@ -23,7 +23,7 @@ class AppsHandler {
         );
       }
     } else if (Platform.isAndroid) {
-      final apps = await InstalledApps.getInstalledApps(withIcon: true);
+      final apps = await InstalledApps.getInstalledApps(withIcon: true, excludeSystemApps: false);
       for (final app in apps) {
         installedApps.add(
           InstalledAppModel(
